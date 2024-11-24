@@ -1,0 +1,55 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# cmake build directory
+/build
+/submodules/fd
+/.ccls-cache
+/.idea
+/.vscode
+/cmake-build-debug
+
+compile_commands.json
+/debug/
+/.z3-trace
+
+.cache
+/submodules/ff/lex.fct_pddl.c
+/submodules/ff/lex.ops_pddl.c
+/submodules/ff/scan-fct_pddl.tab.c
+/submodules/ff/scan-ops_pddl.tab.c
+*.sas
+submodules/ff/ff
+/output/*.txt
+/py/pddlboat.egg-info/
+*.pyc

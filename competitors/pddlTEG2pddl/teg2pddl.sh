@@ -1,0 +1,60 @@
+#!/bin/sh
+
+BINPATH=. #/u/jabaier/research/landmarks_in_pddl/bin
+PDDL2EFFAX=$BINPATH/pddl2effax.sh
+PL=swipl
+TOPDDL=$BINPATH/topddl.pl
+
+if [ $# -ne 3 ]
+then
+  echo "Usage: `basename $0` <PDDL-domain-file> <PDDL-problem-file> <\"dp\" or \"cr\">"
+  exit 1
+fi
+
+
+THIS_PID=$$
+DOMAIN_FILE=$1
+PROBLEM_FILE=$2
+MODE=$3
+
+CURR_PWD=$PWD
+
+#TMP_OUTPUT_DIR=`echo $DOMAIN_FILE | sed -e "s/[^/]*$//" | sed -e "s/\/$//" |sed -e "s/benchmarks/sat-tmp-output/"`
+
+TMP_OUTPUT_DIR=$CURR_PWD/tmp
+
+DF=`basename $DOMAIN_FILE`
+PF=`basename $PROBLEM_FILE`
+
+BASE_PROBLEM=${PF%.pddl}
+BASE_DOMAIN=${DF%.pddl}
+
+#OUTPUT_DOMAIN=dom-`hostname`-$THIS_PID
+#OUTPUT_PROBLEM=prob-`hostname`-$THIS_PID
+
+
+
+OUTPUT_DOMAIN=$BASE_DOMAIN-$BASE_PROBLEM
+OUTPUT_PROBLEM=$BASE_PROBLEM
+
+
+#OUTPUT_TEGS=teg-`hostname`-$THIS_PID
+
+OUTPUT_PROLOG_DOMAIN=plpddldom-luigi-$THIS_PID.pl
+OUTPUT_PROLOG_PROBLEM=plpddlprob-luigi-$THIS_PID.pl
+
+mkdir -p $TMP_OUTPUT_DIR
+
+echo cp $TEG_FILE $TMP_OUTPUT_DIR/$OUTPUT_TEGS
+
+cp $TEG_FILE $TMP_OUTPUT_DIR/$OUTPUT_TEGS
+
+echo $PDDL2EFFAX $DOMAIN_FILE $PROBLEM_FILE $TMP_OUTPUT_DIR/$OUTPUT_DOMAIN.pl $TMP_OUTPUT_DIR/$OUTPUT_PROBLEM.pl $TMP_OUTPUT_DIR/$OUTPUT_PROLOG_DOMAIN $TMP_OUTPUT_DIR/$OUTPUT_PROLOG_PROBLEM
+
+$PDDL2EFFAX $DOMAIN_FILE $PROBLEM_FILE $TMP_OUTPUT_DIR/$OUTPUT_DOMAIN.pl $TMP_OUTPUT_DIR/$OUTPUT_PROBLEM.pl $TMP_OUTPUT_DIR/$OUTPUT_PROLOG_DOMAIN $TMP_OUTPUT_DIR/$OUTPUT_PROLOG_PROBLEM
+
+echo $PL -s $TOPDDL -t "topddl('$TMP_OUTPUT_DIR','$OUTPUT_DOMAIN','$OUTPUT_PROBLEM','$OUTPUT_TEGS',$MODE)."
+
+$PL -s $TOPDDL -t "topddl('$TMP_OUTPUT_DIR','$OUTPUT_DOMAIN','$OUTPUT_PROBLEM',$MODE)."
+
+rm -f domain.pddl facts.pddl

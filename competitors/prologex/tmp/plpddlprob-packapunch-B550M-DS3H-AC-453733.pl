@@ -1,0 +1,2 @@
+pddl_problem(['define',['problem','grounded-strips-os-sequencedstrips-small-4'],[':domain','grounded-strips-openstacks-sequencedstrips'],[':objects','noobjects'],[':init',['not-made-p1'],['not-made-p2'],['not-made-p3'],['not-made-p4'],['not-made-p5'],['waiting-o5'],['waiting-o4'],['waiting-o3'],['waiting-o2'],['waiting-o1'],['stacks-avail-n0'],['machine-available']],[':goal',['and',['eventually',['and',['eventually',['shipped-o1']],['eventually',['shipped-o2']],['eventually',['shipped-o3']]]]]]]
+).

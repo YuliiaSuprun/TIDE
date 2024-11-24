@@ -1,0 +1,6 @@
+[submodule "pddlboat/submodules/downward"]
+	path = pddlboat/submodules/downward
+	url = git@github.com:aibasel/downward.git
+[submodule "pddlboat/submodules/symk"]
+	path = pddlboat/submodules/symk
+	url = git@github.com:wbthomason/symk.git
