@@ -84,13 +84,13 @@ private:
     void realize_dfa_trace(shared_ptr<DFANode>& end_trace_node);
     void realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node);
     void realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_node);
-    pddlboat::ProblemPtr create_subproblem(bdd& edge_cond, shared_ptr<PDDLState> start_state);
+    pddlboat::ProblemPtr create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> out_state);
     pddlboat::PredicatePtr extract_predicate_from_ap_name(const std::string& ap_name);
     map<pddlboat::PredicatePtr, bool> collect_bound_predicates(bdd& edge_cond, bdd& conjunction_bdd);
     map<pddlboat::PredicatePtr, bool> collect_bound_predicates_in_OR(bdd& edge_cond, map<pddlboat::PredicatePtr, bdd>& predicate_to_bdd);
     void split_constraints_and_goals(
     const map<pddlboat::PredicatePtr, bool>& bound_predicates,
-    const pddlboat::StatePtr& start_state,
+    const pddlboat::StatePtr& out_state,
     vector<pddlboat::ExpressionPtr>& constraints,
     vector<pddlboat::ExpressionPtr>& goals);
     void get_goals(const map<pddlboat::PredicatePtr, bool>& bound_predicates,
