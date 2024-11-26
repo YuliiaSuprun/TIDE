@@ -51,3 +51,7 @@ bool PDDLAction::isGrounded() const {
 pddlboat::Assignment PDDLAction::getAssignment() const {
     return assignment_;
 }
+
+pddlboat::VariableList PDDLAction::getParameters() const {
+    return pddlboatAction_->parameters;
+}

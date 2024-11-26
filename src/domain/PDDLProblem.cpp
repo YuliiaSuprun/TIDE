@@ -889,20 +889,34 @@ vector<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>>
 PDDLProblem::plan_single_step_to_goal(shared_ptr<PDDLState> curr_state, pddlboat::ExpressionPtr goal) {
     vector<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>> action_state_pairs;
 
-    // Iterate over all actions in the domain
+     // Get a "raw" pddlboat::StatePtr from the current PDDLState
+    auto pddlboatStatePtr = curr_state->getPddlboatStatePtr();
+
+    // Iterate over all non-grounded actions in the domain
     for (const auto& action : domain_->getActions()) {
-        // Check if the action is applicable in the current state
-        if (!curr_state->isActionApplicable(action)) {
-            continue;
-        }
+        // Get the list of parameters for the current action
+        auto actionParams = action->getParameters();
 
-        // Compute the resulting state after applying the action
-        auto next_state = curr_state->applyAction(action);
+        // Iterate over all possible groundings for the action
+        for (const auto& assignment : pddlProblem_->getGroundings(actionParams)) {
+            // Check if the action's preconditions hold in the current state
+            if (action->checkPreconditions(pddlboatStatePtr, assignment)) {
+                // Clone the current state to apply the effect
+                auto newStatePtr = pddlboatStatePtr->clone();
 
-        // Check if the resulting state satisfies the goal
-        if (next_state && state_satisfies_expression(next_state, goal)) {
-            // Add the action and resulting state to the vector
-            action_state_pairs.emplace_back(action, next_state);
+                // Apply the action effect
+                if (action->applyEffect(newStatePtr, pddlboatStatePtr, assignment)) {
+                    // Check if the resulting state satisfies the goal
+                    auto resulting_state = make_shared<PDDLState>(newStatePtr);
+                    if (state_satisfies_expression(resulting_state, goal)) {
+                        // Ground the action with the current assignment
+                        auto grounded_action = action->ground(assignment);
+
+                        // Add the action and resulting state to the vector
+                        action_state_pairs.emplace_back(grounded_action, resulting_state);
+                    }
+                }
+            }
         }
     }
 

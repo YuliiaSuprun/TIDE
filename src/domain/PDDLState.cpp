@@ -51,42 +51,4 @@ pddlboat::StatePtr PDDLState::getPddlboatStatePtr() const {
     return pddlboatState_;
 }
 
-bool PDDLState::isActionApplicable(const std::shared_ptr<PDDLAction>& action) const {
-    if (action->isGrounded()) {
-        // If the action is already grounded, directly check its preconditions
-        return action->checkPreconditions(pddlboatState_, action->getAssignment());
-    } else {
-        // For non-grounded actions, iterate over possible groundings and check
-        for (const auto& assignment : action->getPddlboatActionPtr()->domain->getGroundings(action->getPddlboatActionPtr()->parameters)) {
-            if (action->checkPreconditions(pddlboatState_, assignment)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-std::shared_ptr<PDDLState> PDDLState::applyAction(const std::shared_ptr<PDDLAction>& action) const {
-    // Clone the current state to apply effects
-    auto newState = std::make_shared<pddlboat::State>(pddlboatState_->clone());
-
-    if (action->isGrounded()) {
-        // Apply the grounded action
-        if (action->applyEffect(newState, pddlboatState_, action->getAssignment())) {
-            return std::make_shared<PDDLState>(newState);
-        }
-    } else {
-        // For non-grounded actions, iterate over possible groundings and apply
-        for (const auto& assignment : action->getPddlboatActionPtr()->domain->getGroundings(action->getPddlboatActionPtr()->parameters)) {
-            if (action->checkPreconditions(pddlboatState_, assignment) &&
-                action->applyEffect(newState, pddlboatState_, assignment)) {
-                return std::make_shared<PDDLState>(newState);
-            }
-        }
-    }
-
-    // Return nullptr if the action could not be applied
-    return nullptr;
-}
-
 

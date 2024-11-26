@@ -22,8 +22,6 @@ public:
     bool operator<(const DomainState& other) const override;
 
     pddlboat::StatePtr getPddlboatStatePtr() const;
-    bool isActionApplicable(const std::shared_ptr<PDDLAction>& action) const;
-    std::shared_ptr<PDDLState> applyAction(const std::shared_ptr<PDDLAction>& action) const;
 
 protected:
     std::ostream& print(std::ostream& os) const override;

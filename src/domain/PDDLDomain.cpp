@@ -64,10 +64,8 @@ const vector<shared_ptr<DomainState>> PDDLDomain::get_successor_states(const Dom
     // Iterate over all non-grounded actions in the domain
     for (const auto& action : actions_) {
 
-        // Get a "raw" pddlboat::ActionPtr
-        auto pddlboatActionPtr = action->getPddlboatActionPtr();
         // Get a list of action parameters.
-        auto actionParams = pddlboatActionPtr->parameters;
+        auto actionParams = action->getParameters();
 
         // Iterate over all possible groundings for this action.
         for (const auto& assignment : pddlProblem_->getGroundings(actionParams)) {

@@ -50,6 +50,8 @@ public:
 
     pddlboat::Assignment getAssignment() const;
 
+    pddlboat::VariableList getParameters() const;
+
 
 private:
     pddlboat::ActionPtr pddlboatAction_;
