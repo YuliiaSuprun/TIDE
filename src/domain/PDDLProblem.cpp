@@ -298,7 +298,7 @@ void PDDLProblem::realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node
             // cout << "Transitioning: " << curr_dfa_state << "=>" << next_dfa_state << endl;
 
             // Add it to the parent map to be able to backtrack.
-            parent_map.emplace(next_state, transition.path());
+            parent_map[next_state] = transition.path();
 
  
             if (next_dfa_state == dfa_trace.at(currentRegionIndex + 1)) {
@@ -395,6 +395,8 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     while (!regionSubproblems.empty()) {
         size_t curr_dfa_state = dfa_trace.at(currentRegionIndex);
         size_t next_dfa_state = dfa_trace.at(currentRegionIndex + 1);
+        ProductState next_prod_state(next_dfa_state);
+        auto last_domain_state = start_domain_state_;
         // cout << "Trying to realize a transition: " << curr_dfa_state << "=>" << next_dfa_state << endl;
         // Check if there are remaining subproblems for the current DFA state
         if (regionSubproblems.count(curr_dfa_state) == 0 || (regionSubproblems.at(curr_dfa_state).empty())) {
@@ -413,155 +415,161 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         if (!prefix_step) {
             cout << "Prefix plan is empty; skipping prepend step." << endl;
         } else {
-            ProductState product_prefix_state(make_shared<PDDLState>(prefix_step->prior), curr_dfa_state, prefix_step);
-            parent_map[product_prefix_state] = {product_prefix_state};
+            cout << "Considering a prefix step: " << endl;
+            prefix_step->toString(std::cout) << endl;
+            // Create PDDLStates from the prior and new states of the step
+            auto prior_domain_state = make_shared<PDDLState>(prefix_step->prior->clone());
+            last_domain_state = make_shared<PDDLState>(prefix_step->state->clone());
+            size_t dfa_state_after_step = (subproblem == nullptr) ? next_dfa_state : curr_dfa_state;
+
+            // Create corresponding product states
+            ProductState prior_product_state(prior_domain_state, curr_dfa_state, prefix_step);
+            next_prod_state = ProductState(last_domain_state, dfa_state_after_step);
+
+            // Add this subplan to the map for easy retrieval. 
+            parent_map[next_prod_state] = {prior_product_state};
         }
 
         if (!subproblem) {
             cout << "Subproblem is nullptr. Only applying prefix plan." << endl;
-            currentRegionIndex++;
-            continue;
-        }
+        } else {
+            // std::cout << "Solving subproblem for DFA state: " << curr_dfa_state << std::endl;
+            // subproblem->goal->toPDDL(std::cout) << std::endl;
 
-        // std::cout << "Solving subproblem for DFA state: " << curr_dfa_state << std::endl;
-        // subproblem->goal->toPDDL(std::cout) << std::endl;
-        // TODO: deal with a prefix plan.
-        auto curr_domain_state = make_shared<PDDLState>(subproblem->start);
-        // Deal with the prefix-plan.
-        ProductState curr_prod_state(curr_domain_state, curr_dfa_state);
+            auto curr_domain_state = make_shared<PDDLState>(subproblem->start);
+            // Deal with the prefix-plan.
+            ProductState curr_prod_state(curr_domain_state, curr_dfa_state);
 
-        // Initial values (needed for working with cached solutions)
-        auto last_domain_state = curr_domain_state;
-        auto next_prod_state = curr_prod_state;
-        bool retrieved_path = false;
+            bool retrieved_path = false;
 
-        if (cache_) {
-            // Retrieve the cached solution if one exists.
-            for (auto &transition : product_manager_->get_transitions(curr_prod_state)) {
-                next_prod_state = transition.out_state();
-                
-                if (next_prod_state.get_dfa_state() == next_dfa_state) {
-                    // Cached solution found
-                    cout << "WARNING: Using a cached solution!" << endl;
-                    // Add it to the parent map to be able to backtrack.
-                    parent_map.emplace(next_prod_state, transition.path());
-                    last_domain_state = static_pointer_cast<PDDLState>(next_prod_state.get_domain_state());
-                    retrieved_path = true;
-                }
-            }
-        }
-
-        if (!retrieved_path) {
-            // Use the planner to solve the subproblem
-            // Instantiate the planner based on the type
-            shared_ptr<pddlboat::Planner> task_planner = get_task_planner(subproblem);
-            if (!task_planner) {
-                cerr<< "ERROR: no task planner initialized!!!!"<< endl;
-                exit(EXIT_FAILURE);
-            }
-            auto plan = make_shared<pddlboat::Plan>(subproblem);
-            if (!task_planner->solve(*plan, subproblem_timeout_))
-            {
-                if (regionSubproblems.at(curr_dfa_state).empty()) {
-                    regionSubproblems.erase(curr_dfa_state);
-                }
-                continue;
-            }
-
-            // cout << "Plan for subproblem: " << endl << *plan << endl;
-
-            // Retrieve the plan's steps (which includes actions and states)
-            auto plan_steps = plan->getSteps();
-            if (plan_steps.empty()) {
-                cerr << "ERROR: the plan is empty! Search failed." << endl;
-                regionSubproblems.clear(); // Finish the search
-                continue;
-            }
-            
-            // Get the final state from the plan and check if it satisfies the DFA edge condition
-            last_domain_state = make_shared<PDDLState>(plan_steps.back().state->clone());
-            next_prod_state = ProductState(last_domain_state, next_dfa_state);
-
-            // Check if it was already explored.
-            if (visited.find(next_prod_state) != visited.end()) {
-                // Skip this state.
-                // TODO: modify the problem to avoid this domain state?
-                num_repeated_paths++;
-                // cout << "ERROR: Found a previously explored path to the dfa state " << next_dfa_state << endl;
-                if (num_repeated_paths >= max_num_repeated_paths) {
-                    // cerr << "Failed to find the alternative path! Search failed." << endl;
-                    // TODO: figure out what to do to not get stuck.
-                    regionSubproblems.clear(); // Finish the search
-                }
-                continue;
-            }
-            // Visit the state.
-            visited.insert(next_prod_state);
-
-            // Get a bdd corresponding to last PDDL state.
-            bdd last_domain_state_bdd = domain_manager_->get_state_bdd(last_domain_state);
-            // Get a bdd corresponding to the transition in the DFA.
-            bdd next_edge_cond = dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition();
-
-            if (!dfa_manager_->is_transition_valid(next_edge_cond, last_domain_state_bdd)) {
-                cout << "ERROR: Transition doesn't satisfy an edge condition for " << curr_dfa_state << "->" << next_dfa_state << endl;
-                continue;
-            }
-
-            bool valid_dfa_state = true;
-            vector<ProductState> product_path;
-
-            // Iterate over the steps to create corresponding ProductStates
-            for (int i = plan_steps.size() - 1; i >= 0; --i) {
-                // Extract the current step and wrap it in a shared pointer
-                auto current_step = make_shared<pddlboat::Plan::Step>(plan_steps.at(i));
-
-                // Create a PDDLState from the prior state of the step
-                auto domain_state = make_shared<PDDLState>(current_step->prior->clone());
-
-                // Get a BDD corresponding to this PDDL state
-                bdd domain_state_bdd = domain_manager_->get_state_bdd(domain_state);
-
-                // Verify that domain states correspond to the current DFA state
-                // TODO: double check what this does
-                if (!((i == 0) || dfa_manager_->is_transition_valid(dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), domain_state_bdd))) {
-                    valid_dfa_state = false;
-                }
-
-                // Create a ProductState with the Plan::Step and push it to the product_path_
-                product_path.emplace_back(domain_state, curr_dfa_state, current_step);
-            }
-
-            // Implement max threshold for the number of wrong transitions.
-            if (!valid_dfa_state) {
-                num_wrong_dfa_trans++;
-                // cout << "ERROR: Solution path goes beyond the dfa state = " << curr_dfa_state << endl;
-                if (num_wrong_dfa_trans >= max_num_wrong_dfa_trans) {
-                    // cerr << "Failed to solve within the same dfa region!" << endl;
-                    regionSubproblems.erase(curr_dfa_state);
-                }
-                continue;
-            }
-
-            // We were able to get to the next DFA state in a trace!
-            // cout << "Succesfully realized this transition: " << curr_dfa_state << "=>" << next_dfa_state << endl;
-
-            num_wrong_dfa_trans = 0;
-            num_repeated_paths = 0;
-
-            // Add it to the parent map to be able to backtrack.
-            parent_map.emplace(next_prod_state, product_path);
-
-            // Update the cost to 0 based on the success of the transition.
-            dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(currentRegionIndex + 1), SUCCESS_COST);
-
-            // Optimization 1: cache paths that cross the dfa states
             if (cache_) {
-                vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_prod_state, true, curr_dfa_state);
+                // Retrieve the cached solution if one exists.
+                for (auto &transition : product_manager_->get_transitions(curr_prod_state)) {
+                    next_prod_state = transition.out_state();
+                    
+                    if (next_prod_state.get_dfa_state() == next_dfa_state) {
+                        // Cached solution found
+                        cout << "WARNING: Using a cached solution!" << endl;
+                        // Add it to the parent map to be able to backtrack.
+                        parent_map[next_prod_state] = transition.path();
+                        last_domain_state = static_pointer_cast<PDDLState>(next_prod_state.get_domain_state());
+                        retrieved_path = true;
+                    }
+                }
+            }
 
-                // Now we create a transition and add it to a product graph.
-                // Serves as a "skip-connection".
-                product_manager_->cache_path(path_to_cache_reversed, next_edge_cond);
+            if (!retrieved_path) {
+                // Use the planner to solve the subproblem
+                // Instantiate the planner based on the type
+                shared_ptr<pddlboat::Planner> task_planner = get_task_planner(subproblem);
+                if (!task_planner) {
+                    cerr<< "ERROR: no task planner initialized!!!!"<< endl;
+                    exit(EXIT_FAILURE);
+                }
+                auto plan = make_shared<pddlboat::Plan>(subproblem);
+                if (!task_planner->solve(*plan, subproblem_timeout_))
+                {
+                    if (regionSubproblems.at(curr_dfa_state).empty()) {
+                        regionSubproblems.erase(curr_dfa_state);
+                    }
+                    continue;
+                }
+
+                // cout << "Plan for subproblem: " << endl << *plan << endl;
+
+                // Retrieve the plan's steps (which includes actions and states)
+                auto plan_steps = plan->getSteps();
+                if (plan_steps.empty()) {
+                    cerr << "ERROR: the plan is empty! Search failed." << endl;
+                    regionSubproblems.clear(); // Finish the search
+                    continue;
+                }
+                
+                // Get the final state from the plan and check if it satisfies the DFA edge condition
+                last_domain_state = make_shared<PDDLState>(plan_steps.back().state->clone());
+                next_prod_state = ProductState(last_domain_state, next_dfa_state);
+
+                // Check if it was already explored.
+                if (visited.find(next_prod_state) != visited.end()) {
+                    // Skip this state.
+                    // TODO: modify the problem to avoid this domain state?
+                    num_repeated_paths++;
+                    // cout << "ERROR: Found a previously explored path to the dfa state " << next_dfa_state << endl;
+                    if (num_repeated_paths >= max_num_repeated_paths) {
+                        // cerr << "Failed to find the alternative path! Search failed." << endl;
+                        // TODO: figure out what to do to not get stuck.
+                        regionSubproblems.clear(); // Finish the search
+                    }
+                    continue;
+                }
+                // Visit the state.
+                visited.insert(next_prod_state);
+
+                // Get a bdd corresponding to last PDDL state.
+                bdd last_domain_state_bdd = domain_manager_->get_state_bdd(last_domain_state);
+                // Get a bdd corresponding to the transition in the DFA.
+                bdd next_edge_cond = dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition();
+
+                if (!dfa_manager_->is_transition_valid(next_edge_cond, last_domain_state_bdd)) {
+                    cout << "ERROR: Transition doesn't satisfy an edge condition for " << curr_dfa_state << "->" << next_dfa_state << endl;
+                    continue;
+                }
+
+                bool valid_dfa_state = true;
+                vector<ProductState> product_path;
+
+                // Iterate over the steps to create corresponding ProductStates
+                for (int i = plan_steps.size() - 1; i >= 0; --i) {
+                    // Extract the current step and wrap it in a shared pointer
+                    auto current_step = make_shared<pddlboat::Plan::Step>(plan_steps.at(i));
+
+                    // Create a PDDLState from the prior state of the step
+                    auto domain_state = make_shared<PDDLState>(current_step->prior->clone());
+
+                    // Get a BDD corresponding to this PDDL state
+                    bdd domain_state_bdd = domain_manager_->get_state_bdd(domain_state);
+
+                    // Verify that domain states correspond to the current DFA state
+                    // TODO: double check what this does
+                    if (!((i == 0) || dfa_manager_->is_transition_valid(dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), domain_state_bdd))) {
+                        valid_dfa_state = false;
+                    }
+
+                    // Create a ProductState with the Plan::Step and push it to the product_path_
+                    product_path.emplace_back(domain_state, curr_dfa_state, current_step);
+                }
+
+                // Implement max threshold for the number of wrong transitions.
+                if (!valid_dfa_state) {
+                    num_wrong_dfa_trans++;
+                    // cout << "ERROR: Solution path goes beyond the dfa state = " << curr_dfa_state << endl;
+                    if (num_wrong_dfa_trans >= max_num_wrong_dfa_trans) {
+                        // cerr << "Failed to solve within the same dfa region!" << endl;
+                        regionSubproblems.erase(curr_dfa_state);
+                    }
+                    continue;
+                }
+
+                // We were able to get to the next DFA state in a trace!
+                // cout << "Succesfully realized this transition: " << curr_dfa_state << "=>" << next_dfa_state << endl;
+
+                num_wrong_dfa_trans = 0;
+                num_repeated_paths = 0;
+
+                // Add it to the parent map to be able to backtrack.
+                parent_map[next_prod_state] = product_path;  
+
+                // Update the cost to 0 based on the success of the transition.
+                dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(currentRegionIndex + 1), SUCCESS_COST);
+
+                // Optimization 1: cache paths that cross the dfa states
+                if (cache_) {
+                    vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_prod_state, true, curr_dfa_state);
+
+                    // Now we create a transition and add it to a product graph.
+                    // Serves as a "skip-connection".
+                    product_manager_->cache_path(path_to_cache_reversed, next_edge_cond);
+                }
             }
         }
 

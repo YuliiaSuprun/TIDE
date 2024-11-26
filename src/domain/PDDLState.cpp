@@ -30,8 +30,10 @@ bool PDDLState::operator==(const DomainState& other) const {
 bool PDDLState::operator<(const DomainState& other) const {
     try {
         const auto& otherPddlState = toPDDLState(other);
-        // Compare by hash.
-        return pddlboatState_->hash() < otherPddlState.pddlboatState_->hash();
+        std::ostringstream thisStateStream, otherStateStream;
+        this->pddlboatState_->toPDDL(thisStateStream);
+        otherPddlState.pddlboatState_->toPDDL(otherStateStream);
+        return thisStateStream.str() < otherStateStream.str();
     } catch (const std::bad_cast&) {
         return false;
     }

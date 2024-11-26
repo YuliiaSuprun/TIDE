@@ -10,6 +10,9 @@
 class ProductState {
 public:
 
+    ProductState(size_t dfa_state)
+    : domain_state_(nullptr), dfa_state_(dfa_state), step_(nullptr), heuristic_cost_(INT_MAX) {}
+
     ProductState(const std::shared_ptr<DomainState> domain_state, size_t dfa_state, std::shared_ptr<pddlboat::Plan::Step> step = nullptr)
     : domain_state_(domain_state), dfa_state_(dfa_state), step_(step), heuristic_cost_(INT_MAX) {}
 
