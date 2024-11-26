@@ -47,3 +47,7 @@ std::shared_ptr<PDDLAction> PDDLAction::ground(const pddlboat::Assignment& assig
 bool PDDLAction::isGrounded() const {
     return grounded_;
 }
+
+pddlboat::Assignment PDDLAction::getAssignment() const {
+    return assignment_;
+}

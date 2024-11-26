@@ -380,7 +380,8 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     int num_repeated_paths = 0;
 
     set<ProductState> visited;
-    map<size_t, pddlboat::ProblemPtr> regionSubproblems;
+    // map<size_t, pddlboat::ProblemPtr> regionSubproblems;
+    map<size_t, vector<pair<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>, pddlboat::ProblemPtr>>> regionSubproblems;
     map<ProductState, vector<ProductState>> parent_map;
 
     size_t dfa_start_state = dfa_trace.front();
@@ -388,26 +389,34 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     visited.insert(start_state);
 
     // Instantiate a subproblem for the first transition
-    pddlboat::ProblemPtr start_subproblem = create_subproblem(dfa_nodes.at(1)->getParentEdgeCondition(), dfa_nodes.at(0)->getSelfEdgeCondition(), start_domain_state_);
-    regionSubproblems.insert({dfa_start_state, start_subproblem});
+    auto start_subproblems = create_subproblem(dfa_nodes.at(1)->getParentEdgeCondition(),
+                                         dfa_nodes.at(0)->getSelfEdgeCondition(),
+                                         start_domain_state_);
+    regionSubproblems.insert({dfa_start_state, start_subproblems});
     
     while (!regionSubproblems.empty()) {
         size_t curr_dfa_state = dfa_trace.at(currentRegionIndex);
         size_t next_dfa_state = dfa_trace.at(currentRegionIndex + 1);
         // cout << "Trying to realize a transition: " << curr_dfa_state << "=>" << next_dfa_state << endl;
-        // Check if there is a subproblem for the current DFA state
-        if (regionSubproblems.count(curr_dfa_state) == 0) {
+        // Check if there are remaining subproblems for the current DFA state
+        if (regionSubproblems.count(curr_dfa_state) == 0 || (regionSubproblems.at(curr_dfa_state).empty())) {
             // Backtrack if necessary
-            assert(currentRegionIndex > 0 && "currentRegionIndex must be positive");
+            if (currentRegionIndex == 0) {
+                cerr << "Failed to realize DFA trace. No more subproblems to try." << endl;
+                return;
+            }
             currentRegionIndex--;
             continue;  
         }
+        // Pop the next <prefix-plan, subproblem> pair to try
+        auto [prefix_plan, subproblem] = regionSubproblems[curr_dfa_state].back();
+        regionSubproblems[curr_dfa_state].pop_back();
 
-        auto& subproblem = regionSubproblems[curr_dfa_state];
         // std::cout << "Solving subproblem for DFA state: " << curr_dfa_state << std::endl;
         // subproblem->goal->toPDDL(std::cout) << std::endl;
-
+        // TODO: deal with a prefix plan.
         auto curr_domain_state = make_shared<PDDLState>(subproblem->start);
+        // Deal with the prefix-plan.
         ProductState curr_prod_state(curr_domain_state, curr_dfa_state);
 
         // Initial values (needed for working with cached solutions)
@@ -431,7 +440,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
             }
         }
 
-        if (!retrieved_path) {
+        if (!retrieved_path && subproblem) {
             // Use the planner to solve the subproblem
             // Instantiate the planner based on the type
             shared_ptr<pddlboat::Planner> task_planner = get_task_planner(subproblem);
@@ -442,7 +451,9 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
             auto plan = make_shared<pddlboat::Plan>(subproblem);
             if (!task_planner->solve(*plan, subproblem_timeout_))
             {
-                regionSubproblems.erase(curr_dfa_state);
+                if (regionSubproblems.at(curr_dfa_state).empty()) {
+                    regionSubproblems.erase(curr_dfa_state);
+                }
                 continue;
             }
 
@@ -468,6 +479,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 // cout << "ERROR: Found a previously explored path to the dfa state " << next_dfa_state << endl;
                 if (num_repeated_paths >= max_num_repeated_paths) {
                     // cerr << "Failed to find the alternative path! Search failed." << endl;
+                    // TODO: figure out what to do to not get stuck.
                     regionSubproblems.clear(); // Finish the search
                 }
                 continue;
@@ -500,6 +512,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 bdd domain_state_bdd = domain_manager_->get_state_bdd(domain_state);
 
                 // Verify that domain states correspond to the current DFA state
+                // TODO: double check what this does
                 if (!((i == 0) || dfa_manager_->is_transition_valid(dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), domain_state_bdd))) {
                     valid_dfa_state = false;
                 }
@@ -557,8 +570,8 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         }
 
         // Instantiate a subproblem.
-        pddlboat::ProblemPtr next_subproblem = create_subproblem(dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition(), dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), last_domain_state);
-        regionSubproblems.insert({next_dfa_state, next_subproblem});
+        auto next_subproblems = create_subproblem(dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition(), dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), last_domain_state);
+        regionSubproblems.insert({next_dfa_state, next_subproblems});
     } 
     // We failed to realize the provided dfa trace.
     // Update the cost for the dfa transition we couldn't realize.
@@ -708,7 +721,7 @@ size_t PDDLProblem::get_plan_length() const {
 //         // cout << endl << "Disjunctive goal: " << endl;
 //         // disjunct_goals_expr->toPDDL(cout);
 //         // cout << endl;
-//         if (disjunct_goals_expr->evaluate(start_state->getPddlboatStatePtr(), {})) {
+//         if (state_satisfies_expression(start_state, disjunct_goals_expr)) {
 //             // cout << "disjunct_goals_expr is true in a start state" <<endl;
 //             // Add it to constraints.
 //             constraints.push_back(disjunct_goals_expr);
@@ -757,80 +770,145 @@ size_t PDDLProblem::get_plan_length() const {
         // Create a self_edge_constraint and include it in the domain
 
     // Step 3: Create subproblem with final_goal and a new "constrained" domain
-pddlboat::ProblemPtr PDDLProblem::create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> out_state) {
+vector<pair<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>, pddlboat::ProblemPtr>> PDDLProblem::create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> curr_state) {
     // Step 1: Create a goal for the subproblem
+    auto final_goal = bdd_to_expression(edge_cond);
+
+    // Step 2: Deal with constraints on intermediate states
+    vector<pair<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>, pddlboat::ProblemPtr>> results;
+
+    if (bdd_or(edge_cond, self_edge_cond) == bddtrue) {
+        // Case 1: No constraints needed for self-edge
+        auto subproblem = instantiate_subproblem(curr_state, final_goal);
+        // Single entry in results with no action prefix
+        results.emplace_back(make_pair(nullptr, nullptr), subproblem);
+    } else if (self_edge_cond == bddfalse) {
+        // Case 2: No self-edge
+        cout << "No self edge detected! Finding a plan of length 1..." << endl;
+        // Plan to reach the final_goal in a single step
+        auto action_state_pairs = plan_single_step_to_goal(curr_state, final_goal);
+        if (action_state_pairs.empty()) {
+            std::cerr << "Error: Failed to find a single-step plan to reach the final goal." << std::endl;
+            return {};
+        }
+        for (auto& pair : action_state_pairs) {
+            auto subproblem = instantiate_subproblem(pair.second, final_goal);
+            results.emplace_back(pair, subproblem);
+        }
+    } else {
+        auto self_edge_expr = bdd_to_expression(self_edge_cond);
+        if (!state_satisfies_expression(curr_state, self_edge_expr)) {
+            // Case 3: Self-edge condition is NOT satisfied in curr_state
+            auto extended_goal = pddlboat::makeOr({final_goal, self_edge_expr});
+            cout << "Self-edge condition not satisfied in current state! Finding a plan of length 1..." << endl;
+
+            auto action_state_pairs = plan_single_step_to_goal(curr_state, extended_goal);
+            if (action_state_pairs.empty()) {
+                std::cerr << "Error: Failed to find a single-step plan to reach the extended goal." << std::endl;
+                return {};
+            }
+
+            for (auto& pair : action_state_pairs) {
+                auto next_state = pair.second;
+                if (state_satisfies_expression(next_state, final_goal)) {
+                    // No need for a subproblem; the goal is already achieved
+                    results.emplace_back(pair, nullptr);
+                } else if (state_satisfies_expression(next_state, self_edge_expr)) {
+                    // Converted to Case 4: Create a subproblem with self-edge constraints
+                    auto subproblem = instantiate_subproblem(next_state, final_goal, self_edge_expr);
+                    results.emplace_back(pair, subproblem);
+                }
+            }
+        } else {
+            // Case 4: Self-edge condition is satisfied in curr_state
+            auto subproblem = instantiate_subproblem(curr_state, final_goal, self_edge_expr);
+            results.emplace_back(make_pair(nullptr, nullptr), subproblem);
+        }
+    }
+    return results;
+}
+
+pddlboat::ExpressionPtr PDDLProblem::bdd_to_expression(bdd& edge_cond) {
+    // Step 1: Collect required predicates (conjuncts) from the BDD
     bdd required_predicates_bdd;
     auto required_predicates = collect_bound_predicates(edge_cond, required_predicates_bdd);
 
-    // Separate disjunctive conditions
+    // Step 2: Separate disjunctive conditions
     bdd disjunct_conditions = edge_cond;
     if (!required_predicates.empty()) {
-        // Simplify edge_cond by removing required predicates
+        // Move required conjuncts outside of disjunction
         disjunct_conditions = bdd_restrict(edge_cond, required_predicates_bdd);
     }
 
-    // Determine the type of goal: conjunction or disjunction
+    // Step 3: Determine if the edge condition is a simple conjunction
     bool is_simple_conjunction = (disjunct_conditions == bddtrue);
-    vector<pddlboat::ExpressionPtr> required_goals;
-    get_goals(required_predicates, required_goals);
 
-    vector<pddlboat::ExpressionPtr> final_goal_expressions = required_goals;
+    // Step 4: Convert required predicates into goals (ANDed)
+    vector<pddlboat::ExpressionPtr> final_goal_expressions;
+    get_goals(required_predicates, final_goal_expressions);
+
+    // Step 5: Handle disjunctive conditions (if any)
     if (!is_simple_conjunction) {
         vector<pddlboat::ExpressionPtr> disjunct_goals;
         create_disjunct_goals(disjunct_conditions, disjunct_goals);
         auto disjunctive_expr = pddlboat::makeOr(disjunct_goals);
         final_goal_expressions.push_back(disjunctive_expr);
     }
-    auto final_goal = pddlboat::makeAnd(final_goal_expressions);
 
-    // Step 2: Deal with constraints on intermediate states
-    vector<pddlboat::ExpressionPtr> constraints;
+    // Step 6: Combine all expressions into a single AND expression
+    return pddlboat::makeAnd(final_goal_expressions);
+}
 
-    if (bdd_or(edge_cond, self_edge_cond) == bddtrue) {
-        // Case 1: No constraints needed for self-edge
-    } else if (self_edge_cond == bddfalse) {
-        // Case 2: No self-edge
-        // Plan to reach the final_goal in a single step
-        auto single_step_plan = plan_single_step_to_goal(out_state, final_goal);
-        if (!single_step_plan) {
-            throw std::runtime_error("Failed to find a single-step plan to reach final_goal.");
-        }
-        out_state = single_step_plan;
-    } else {
-        // Case 3: Self-edge not satisfied in out_state
-        auto self_edge_expr = bdd_to_expression(self_edge_cond);
-        auto extended_goal = pddlboat::makeOr({final_goal, self_edge_expr});
-        auto single_step_plan = plan_single_step_to_goal(out_state, extended_goal);
+bool PDDLProblem::state_satisfies_expression(shared_ptr<PDDLState> state, pddlboat::ExpressionPtr expr) {
+    // Evaluate the expression against the state's PDDL representation
+    return expr->evaluate(state->getPddlboatStatePtr(), {});
+}
 
-        if (!single_step_plan) {
-            throw std::runtime_error("Failed to find a single-step plan to extended goal.");
-        }
-
-        // Check if the single-step plan satisfies the final goal
-        if (state_satisfies_goal(single_step_plan, final_goal)) {
-            out_state = single_step_plan;
-        } else {
-            // Case 4: Include a self-edge constraint
-            constraints.push_back(self_edge_expr);
-            out_state = single_step_plan;
-        }
+pddlboat::ProblemPtr PDDLProblem::instantiate_subproblem(
+    const shared_ptr<PDDLState>& start_state, 
+    pddlboat::ExpressionPtr goal, 
+    pddlboat::ExpressionPtr constraint_expr
+) {
+    // If a constraint is provided, create a constrained domain
+    pddlboat::DomainPtr used_domain = domain_->getPddlboatDomainPtr();
+    if (constraint_expr) {
+        used_domain = get_domain_with_constraints(constraint_expr, used_domain);
     }
 
-    // Add constraints as derived predicates to the domain
-    pddlboat::DomainPtr constrained_domain = domain_;
-    if (!constraints.empty()) {
-        auto constraints_expr = pddlboat::makeAnd(constraints);
-        constrained_domain = get_domain_with_constraints(constraints_expr, domain_);
-    }
-
-    // Step 3: Create the subproblem with final_goal and constrained_domain
-    auto subproblem = make_shared<pddlboat::Problem>("subproblem", constrained_domain);
+    // Instantiate the subproblem
+    auto subproblem = make_shared<pddlboat::Problem>("subproblem", used_domain);
     subproblem->objects = pddlProblem_->objects;
-    subproblem->start = out_state->getPddlboatStatePtr();
-    subproblem->goal = final_goal;
+    subproblem->start = start_state->getPddlboatStatePtr();
+    subproblem->goal = goal;
 
     return subproblem;
 }
+
+
+vector<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>> 
+PDDLProblem::plan_single_step_to_goal(shared_ptr<PDDLState> curr_state, pddlboat::ExpressionPtr goal) {
+    vector<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>> action_state_pairs;
+
+    // Iterate over all actions in the domain
+    for (const auto& action : domain_->getActions()) {
+        // Check if the action is applicable in the current state
+        if (!curr_state->isActionApplicable(action)) {
+            continue;
+        }
+
+        // Compute the resulting state after applying the action
+        auto next_state = curr_state->applyAction(action);
+
+        // Check if the resulting state satisfies the goal
+        if (next_state && state_satisfies_expression(next_state, goal)) {
+            // Add the action and resulting state to the vector
+            action_state_pairs.emplace_back(action, next_state);
+        }
+    }
+
+    return action_state_pairs;
+}
+
 
 void PDDLProblem::create_disjunct_goals(bdd& simple_disjunction, vector<pddlboat::ExpressionPtr>& disjunct_goals) {
     map<pddlboat::PredicatePtr, bdd> predicate_to_bdd;

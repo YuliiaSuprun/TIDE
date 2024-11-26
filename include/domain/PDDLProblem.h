@@ -84,13 +84,13 @@ private:
     void realize_dfa_trace(shared_ptr<DFANode>& end_trace_node);
     void realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node);
     void realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_node);
-    pddlboat::ProblemPtr create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> out_state);
+    vector<pair<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>, pddlboat::ProblemPtr>> create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> curr_state);
     pddlboat::PredicatePtr extract_predicate_from_ap_name(const std::string& ap_name);
     map<pddlboat::PredicatePtr, bool> collect_bound_predicates(bdd& edge_cond, bdd& conjunction_bdd);
     map<pddlboat::PredicatePtr, bool> collect_bound_predicates_in_OR(bdd& edge_cond, map<pddlboat::PredicatePtr, bdd>& predicate_to_bdd);
     void split_constraints_and_goals(
     const map<pddlboat::PredicatePtr, bool>& bound_predicates,
-    const pddlboat::StatePtr& out_state,
+    const pddlboat::StatePtr& curr_state,
     vector<pddlboat::ExpressionPtr>& constraints,
     vector<pddlboat::ExpressionPtr>& goals);
     void get_goals(const map<pddlboat::PredicatePtr, bool>& bound_predicates,
@@ -111,6 +111,16 @@ private:
     void constructDFAWithPromise(std::shared_ptr<DFAManager> dfa_manager, LTLFormula formula, std::promise<void> dfa_promise);
 
     void create_disjunct_goals(bdd& simple_disjunction, vector<pddlboat::ExpressionPtr>& disjunct_goals);
+
+    vector<pair<shared_ptr<PDDLAction>, shared_ptr<PDDLState>>> plan_single_step_to_goal(shared_ptr<PDDLState> curr_state, pddlboat::ExpressionPtr goal);
+
+    pddlboat::ProblemPtr instantiate_subproblem(
+    const shared_ptr<PDDLState>& start_state, 
+    pddlboat::ExpressionPtr goal, 
+    pddlboat::ExpressionPtr constraint_expr = nullptr);
+
+    pddlboat::ExpressionPtr bdd_to_expression(bdd& edge_cond);
+    bool state_satisfies_expression(shared_ptr<PDDLState> state, pddlboat::ExpressionPtr expr);
 
     pddlboat::ProblemPtr pddlProblem_;
     LTLFormula formula_;

@@ -48,6 +48,9 @@ public:
     std::shared_ptr<PDDLAction> ground(const pddlboat::Assignment& assignment) const;
     bool isGrounded() const;
 
+    pddlboat::Assignment getAssignment() const;
+
+
 private:
     pddlboat::ActionPtr pddlboatAction_;
     pddlboat::Assignment assignment_;

@@ -156,3 +156,7 @@ std::shared_ptr<pddlboat::Domain> PDDLDomain::getPddlboatDomainPtr() const {
 void PDDLDomain::setProblem(pddlboat::ProblemPtr problemPtr) {
     pddlProblem_ = problemPtr;
 }
+
+const vector<shared_ptr<PDDLAction>>& PDDLDomain::getActions() const {
+    return actions_;
+}
