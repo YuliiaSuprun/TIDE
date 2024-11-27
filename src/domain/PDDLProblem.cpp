@@ -402,7 +402,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         if (regionSubproblems.count(curr_dfa_state) == 0 || (regionSubproblems.at(curr_dfa_state).empty())) {
             // Backtrack if necessary
             if (currentRegionIndex == 0) {
-                cerr << "Failed to realize DFA trace. No more subproblems to try." << endl;
+                // cerr << "Failed to realize DFA trace. No more subproblems to try." << endl;
                 return;
             }
             currentRegionIndex--;
@@ -413,10 +413,10 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         regionSubproblems[curr_dfa_state].pop_back();
 
         if (!prefix_step) {
-            cout << "Prefix plan is empty; skipping prepend step." << endl;
+            // cout << "Prefix plan is empty; skipping prepend step." << endl;
         } else {
-            cout << "Considering a prefix step: " << endl;
-            prefix_step->toString(std::cout) << endl;
+            // cout << "Considering a prefix step: " << endl;
+            // prefix_step->toString(std::cout) << endl;
             // Create PDDLStates from the prior and new states of the step
             auto prior_domain_state = make_shared<PDDLState>(prefix_step->prior->clone());
             last_domain_state = make_shared<PDDLState>(prefix_step->state->clone());
@@ -430,9 +430,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
             parent_map[next_prod_state] = {prior_product_state};
         }
 
-        if (!subproblem) {
-            cout << "Subproblem is nullptr. Only applying prefix plan." << endl;
-        } else {
+        if (subproblem) {
             // std::cout << "Solving subproblem for DFA state: " << curr_dfa_state << std::endl;
             // subproblem->goal->toPDDL(std::cout) << std::endl;
 
@@ -801,38 +799,41 @@ vector<pair<shared_ptr<pddlboat::Plan::Step>, pddlboat::ProblemPtr>> PDDLProblem
 
     if (bdd_or(edge_cond, self_edge_cond) == bddtrue) {
         // Case 1: No constraints needed for self-edge
-        cout << "Case 1: No constraints needed for self-edge" << endl;
+        // cout << "Case 1: No constraints needed for self-edge" << endl;
         auto subproblem = instantiate_subproblem(curr_domain_state, final_goal);
         // Single entry in results with no action prefix
         results.emplace_back(nullptr, subproblem);
     } else if (self_edge_cond == bddfalse) {
         // Case 2: No self-edge
-        cout << "Case 2: No self-edge" << endl;
-        cout << "No self edge detected! Finding a plan of length 1..." << endl;
+        // cout << "Case 2: No self-edge" << endl;
+        // cout << "No self edge detected! Finding a plan of length 1..." << endl;
         // Plan to reach the final_goal in a single step
         auto single_steps = plan_single_step_to_goal(curr_domain_state, final_goal);
         if (single_steps.empty()) {
-            std::cerr << "Error: Failed to find a single-step plan to reach the final goal." << std::endl;
+            // std::cerr << "Error: Failed to find a single-step plan to reach the final goal." << std::endl;
             return {};
         }
+        // cout << "Potential steps: " << endl;
         for (auto& step : single_steps) {
             results.emplace_back(step, nullptr);
+            // step->toString(std::cout) << endl;
         }
     } else {
         auto self_edge_expr = bdd_to_expression(self_edge_cond);
         if (!state_satisfies_expression(curr_domain_state, self_edge_expr)) {
             // Case 3: Self-edge condition is NOT satisfied in curr_state
-            cout << "Case 3: Self-edge condition is NOT satisfied in curr_state" << endl;
+            // cout << "Case 3: Self-edge condition is NOT satisfied in curr_state" << endl;
             auto extended_goal = pddlboat::makeOr({final_goal, self_edge_expr});
-            cout << "Self-edge condition not satisfied in current state! Finding a plan of length 1..." << endl;
+            // cout << "Self-edge condition not satisfied in current state! Finding a plan of length 1..." << endl;
 
             auto single_steps = plan_single_step_to_goal(curr_domain_state, extended_goal);
             if (single_steps.empty()) {
-                std::cerr << "Error: Failed to find a single-step plan to reach the extended goal." << std::endl;
+                // std::cerr << "Error: Failed to find a single-step plan to reach the extended goal." << std::endl;
                 return {};
             }
-
+            // cout << "Potential steps: " << endl;
             for (auto& step : single_steps) {
+                // step->toString(std::cout) << endl;
                 auto next_state = step->state;
                 if (state_satisfies_expression(next_state, final_goal)) {
                     // No need for a subproblem; the goal is already achieved
@@ -845,7 +846,7 @@ vector<pair<shared_ptr<pddlboat::Plan::Step>, pddlboat::ProblemPtr>> PDDLProblem
             }
         } else {
             // Case 4: Self-edge condition is satisfied in curr_state
-            cout << "Case 4: Self-edge condition is satisfied in curr_state" << endl;
+            // cout << "Case 4: Self-edge condition is satisfied in curr_state" << endl;
             auto subproblem = instantiate_subproblem(curr_domain_state, final_goal, self_edge_expr);
             results.emplace_back(nullptr, subproblem);
         }
@@ -894,13 +895,13 @@ pddlboat::ProblemPtr PDDLProblem::instantiate_subproblem(
     pddlboat::ExpressionPtr goal, 
     pddlboat::ExpressionPtr constraint_expr
 ) {
-    cout << "Instantiating a subproblem with the following goal: " << endl;
-    goal->toPDDL(std::cout) << std::endl;
+    // cout << "Instantiating a subproblem with the following goal: " << endl;
+    // goal->toPDDL(std::cout) << std::endl;
     // If a constraint is provided, create a constrained domain
     pddlboat::DomainPtr used_domain = domain_->getPddlboatDomainPtr();
     if (constraint_expr) {
-        cout << " and these constraints: " << endl;
-        constraint_expr->toPDDL(std::cout) << std::endl;
+        // cout << " and these constraints: " << endl;
+        // constraint_expr->toPDDL(std::cout) << std::endl;
         used_domain = get_domain_with_constraints(constraint_expr, used_domain);
     }
 

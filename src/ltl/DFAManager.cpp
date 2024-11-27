@@ -194,7 +194,7 @@ bdd DFAManager::get_edge_cond(size_t curr_dfa_state, size_t next_dfa_state) cons
             return edge.cond;
         }
     }
-    cerr << "ERROR: no transition was found for: " << curr_dfa_state << "->" << next_dfa_state << endl;
+    // cerr << "ERROR: no transition was found for: " << curr_dfa_state << "->" << next_dfa_state << endl;
     return bddfalse;
 }
 
