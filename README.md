@@ -1,5 +1,6 @@
-# GridWorld Planning with LTLf Formulas
-This repository contains a C++ implementation of a planner that solves tasks in a grid-world environment using Linear Temporal Logic formulas (LTLf). The code represents grid-world domains, obstacles, states, and goals, and uses LTLf formulas to define temporal tasks.
+# TIDE: A Trace-Informed Depth-First Exploration
+
+This repository contains the implementation of **TIDE (Trace-Informed Depth-First Exploration)**, a novel planner designed to solve tasks in general planning domains defined in PDDL format with LTL$_f$ (Linear Temporal Logic on finite traces) goals. TIDE decomposes the temporal planning problem into a sequence of classical planning subproblems and leverages off-the-shelf planners for efficient execution. 
 ## Installation
 1. Ensure you have a C++17-compatible compiler installed.
 2. Installing Required Libraries:
