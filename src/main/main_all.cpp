@@ -110,6 +110,39 @@ int main(int argc, char** argv) {
     }
 
     string domainFilePath = directoryPath + "/domain.pddl";
+    string domain_name = PDDLProblem::extract_domain_name(domainFilePath);
+
+    string currentPath = filesystem::current_path().string();
+
+    string common_dir_name = currentPath + "/solutions";
+    // Create the solutions directory if it doesn't exist
+    filesystem::create_directory(common_dir_name);
+
+    common_dir_name = common_dir_name + "/tide";
+    // Create the solutions directory for tide if it doesn't exist
+    filesystem::create_directory(common_dir_name);
+
+    // Create the planner subdirectory if it doesn't exist
+    common_dir_name = common_dir_name + "/" + planner_type;
+    filesystem::create_directory(common_dir_name);
+
+    if (!search_type.empty()) {
+        // Create the planner subdirectory if it doesn't exist
+        common_dir_name = common_dir_name + "/" + search_type;
+        filesystem::create_directory(common_dir_name);
+    }
+    // Create the domain subdirectory if it doesn't exist
+    common_dir_name = common_dir_name + "/" + domain_name;
+    filesystem::create_directory(common_dir_name);
+
+    // Define the general statistics file path
+    string generalStatsFilePath = common_dir_name + "/overall_stats.txt";
+    // Open the general statistics file in append mode
+    ofstream generalStatsFile(generalStatsFilePath, ios::app);
+    if (!generalStatsFile.is_open()) {
+        cerr << "Failed to open general stats file: " << generalStatsFilePath << endl;
+        return EXIT_FAILURE;
+    }
 
     for (const auto& entry : fs::directory_iterator(directoryPath)) {
         if (!entry.is_regular_file()) {
@@ -126,33 +159,9 @@ int main(int argc, char** argv) {
 
         // Extract a problem name.
         string problem_name = PDDLProblem::extract_problem_name(problemFilePath);
-        string domain_name = PDDLProblem::extract_domain_name(problemFilePath);
-
-        string currentPath = filesystem::current_path().string();
-
-        string dir_name = currentPath + "/solutions";
-        // Create the solutions directory if it doesn't exist
-        filesystem::create_directory(dir_name);
-
-        dir_name = dir_name + "/tide";
-        // Create the solutions directory for tide if it doesn't exist
-        filesystem::create_directory(dir_name);
-
-        // Create the planner subdirectory if it doesn't exist
-        dir_name = dir_name + "/" + planner_type;
-        filesystem::create_directory(dir_name);
-
-        if (!search_type.empty()) {
-            // Create the planner subdirectory if it doesn't exist
-            dir_name = dir_name + "/" + search_type;
-            filesystem::create_directory(dir_name);
-        }
-        // Create the domain subdirectory if it doesn't exist
-        dir_name = dir_name + "/" + domain_name;
-        filesystem::create_directory(dir_name);
 
         // Create the problem subdirectory if it doesn't exist
-        dir_name = dir_name + "/" + problem_name;
+        string dir_name = common_dir_name + "/" + problem_name;
         filesystem::create_directory(dir_name);
 
         // Variables to store total elapsed time for averaging
@@ -223,6 +232,15 @@ int main(int argc, char** argv) {
         double averageExpandedNodes = static_cast<double>(totalExpandedNodes) / numRuns;
         double averagePlanLength = static_cast<double>(totalPlanLength) / numRuns;
         double averageNumOfBacktracks = static_cast<double>(totalNumOfBacktracks) / numRuns;
+
+        // Append summary statistics to the general stats file
+        generalStatsFile << "For " << problem_name << " (" << numRuns << " runs): " << endl;
+        generalStatsFile << "Average total time: " << averageTotalTime << " seconds" << endl;
+        generalStatsFile << "Average plan length: " << averagePlanLength << endl;
+        generalStatsFile << "Average number of backtracks: " << averageNumOfBacktracks << endl;
+        generalStatsFile << "-----------------------------------------------" << endl;
+
+
         printStats(std::cout, numRuns, averageDFATime, firstRunDFATime, averageDFATimeNoFirst, averageSearchTime, averageTotalTime, averageExpandedNodes, averagePlanLength, averageNumOfBacktracks);
 
         // Create the stats file
@@ -241,6 +259,9 @@ int main(int argc, char** argv) {
         // Close the file
         statsFile.close();
     }
+
+    // Close the general stats file
+    generalStatsFile.close();
 
     return 0;
 }

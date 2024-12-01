@@ -73,7 +73,7 @@ public:
 
     // Function to return Spot's formula
     spot::formula get_spot_formula() const {
-        cout << "LTLf Formula: " << formula_ << endl;
+        // cout << "LTLf Formula: " << formula_ << endl;
         spot::parsed_formula pf = spot::parse_infix_psl(formula_);
         // Here, we could also handle any parsing errors.
         // Handle any parsing errors
