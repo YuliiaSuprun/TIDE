@@ -283,7 +283,7 @@ void PDDLProblem::realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node
                     // Cache this for future reuse.
                     // TODO: implement caching!
                     // if (cache_ && !transition.isCached()) {
-                    //     vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_state, true, curr_dfa_state);
+                    //     vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_state, true);
                     //     // Now we create a transition and add it to a product graph.
                     //     // Serves as a "skip-connection".
                     //     product_manager_->cache_path(path_to_cache_reversed, transition.dfa_edge_condition());
@@ -311,16 +311,16 @@ void PDDLProblem::realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node
                 dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(currentRegionIndex + 1), SUCCESS_COST);
 
                 // Optimization 1: cache paths that cross the dfa states
-                if (cache_ && !transition.isCached()) {
+                // if (cache_ && !transition.isCached()) {
 
-                    vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_state, true, curr_dfa_state);
+                //     vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_state, true);
 
-                    // Now we create a transition and add it to a product graph.
-                    // Serves as a "skip-connection".
-                    product_manager_->cache_path(path_to_cache_reversed, transition.dfa_edge_condition());
+                //     // Now we create a transition and add it to a product graph.
+                //     // Serves as a "skip-connection".
+                //     product_manager_->cache_path(path_to_cache_reversed, transition.dfa_edge_condition());
 
-                    // TODO: cache it as a path between modalities in DomainManager (can be reused for other TEG problems).
-                }
+                //     // TODO: cache it as a path between modalities in DomainManager (can be reused for other TEG problems).
+                // }
 
                 currentRegionIndex++;
 
@@ -384,13 +384,51 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     map<size_t, vector<pair<shared_ptr<pddlboat::Plan::Step>, pddlboat::ProblemPtr>>> regionSubproblems;
     map<ProductState, vector<ProductState>> parent_map;
 
-    size_t dfa_start_state = dfa_trace.front();
-    ProductState start_state(start_domain_state_, dfa_start_state);
-    visited.insert(start_state);
+    // Check for cached solution paths for prefixes of the DFA trace.
+    vector<ProductState> cached_path;
+    size_t cached_prefix_length = 0;
+
+    if (cache_) {
+        // Start from the shortest prefix (length 2) to the full trace length.
+        for (size_t prefix_length = 2; prefix_length <= dfa_trace.size(); ++prefix_length) {
+            vector<size_t> prefix(dfa_trace.begin(), dfa_trace.begin() + prefix_length);
+            auto it = dfa_trace_cache_.find(prefix);
+            if (it != dfa_trace_cache_.end()) {
+                cached_path = it->second;
+                cached_prefix_length = prefix_length;
+            } else {
+                // Stop: a missing prefix means longer ones won't exist either.
+                break;
+            }
+        }
+    }
+
+    ProductState start_state(start_domain_state_, dfa_trace.front());
+
+    // If a cached path was found, initialize the parent_map and visited set.
+    if (!cached_path.empty()) {
+        // cout << "Found a cached solution path for DFA prefix of length: " << cached_prefix_length << endl;
+
+        // Set the starting state for the loop.
+        start_state = cached_path.front(); // Cached path is reversed.
+        currentRegionIndex = cached_prefix_length - 1;
+        maxRegionIndexReached = currentRegionIndex;
+
+        // Mark all states in the cached path as visited.
+        visited.insert(cached_path.begin(), cached_path.end());
+
+        // Remove the first element from cached_path for parent_map
+        cached_path.erase(cached_path.begin());
+
+        // Add the modified cached_path to parent_map
+        parent_map[start_state] = cached_path;
+    } else {
+        visited.insert(start_state);
+    }
 
     // Instantiate a subproblem for the first transition
-    auto start_subproblems = create_subproblem(dfa_nodes.at(1)->getParentEdgeCondition(), dfa_nodes.at(0)->getSelfEdgeCondition(),start_domain_state_);
-    regionSubproblems.insert({dfa_start_state, start_subproblems});
+    auto start_subproblems = create_subproblem(dfa_nodes.at(currentRegionIndex + 1)->getParentEdgeCondition(), dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), start_state.getPDDLState());
+    regionSubproblems.insert({dfa_trace.at(currentRegionIndex), start_subproblems});
     
     while (!regionSubproblems.empty()) {
         size_t curr_dfa_state = dfa_trace.at(currentRegionIndex);
@@ -403,7 +441,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
             // Backtrack if necessary
             if (currentRegionIndex == 0) {
                 // cerr << "Failed to realize DFA trace. No more subproblems to try." << endl;
-                return;
+                regionSubproblems.clear(); // Finish the search
             }
             currentRegionIndex--;
             continue;  
@@ -439,22 +477,6 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
             ProductState curr_prod_state(curr_domain_state, curr_dfa_state);
 
             bool retrieved_path = false;
-
-            if (cache_) {
-                // Retrieve the cached solution if one exists.
-                for (auto &transition : product_manager_->get_transitions(curr_prod_state)) {
-                    next_prod_state = transition.out_state();
-                    
-                    if (next_prod_state.get_dfa_state() == next_dfa_state) {
-                        // Cached solution found
-                        cout << "WARNING: Using a cached solution!" << endl;
-                        // Add it to the parent map to be able to backtrack.
-                        parent_map[next_prod_state] = transition.path();
-                        last_domain_state = static_pointer_cast<PDDLState>(next_prod_state.get_domain_state());
-                        retrieved_path = true;
-                    }
-                }
-            }
 
             if (!retrieved_path) {
                 // Use the planner to solve the subproblem
@@ -509,7 +531,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 bdd next_edge_cond = dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition();
 
                 if (!dfa_manager_->is_transition_valid(next_edge_cond, last_domain_state_bdd)) {
-                    cout << "ERROR: Transition doesn't satisfy an edge condition for " << curr_dfa_state << "->" << next_dfa_state << endl;
+                    // cout << "ERROR: Transition doesn't satisfy an edge condition for " << curr_dfa_state << "->" << next_dfa_state << endl;
                     continue;
                 }
 
@@ -560,13 +582,13 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 // Update the cost to 0 based on the success of the transition.
                 dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(currentRegionIndex + 1), SUCCESS_COST);
 
-                // Optimization 1: cache paths that cross the dfa states
+                // Add it to the cache for future reuse.
                 if (cache_) {
-                    vector<ProductState> path_to_cache_reversed = construct_path(parent_map, next_prod_state, true, curr_dfa_state);
-
-                    // Now we create a transition and add it to a product graph.
-                    // Serves as a "skip-connection".
-                    product_manager_->cache_path(path_to_cache_reversed, next_edge_cond);
+                    vector<size_t> prefix(dfa_trace.begin(), dfa_trace.begin() + currentRegionIndex + 2);
+                    dfa_trace_cache_[prefix] = construct_path(parent_map, next_prod_state, true);
+                    // cout << "Cached solution path for DFA prefix: ";
+                    // for (const auto& state : prefix) cout << state << " ";
+                    // cout << endl;
                 }
             }
         }
@@ -595,7 +617,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(maxRegionIndexReached + 1), FAILURE_COST);
 }
 
-vector<ProductState> PDDLProblem::construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached, size_t start_dfa_state) {
+vector<ProductState> PDDLProblem::construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached) {
     vector<ProductState> path;
     path.push_back(target_state);
 
@@ -604,11 +626,6 @@ vector<ProductState> PDDLProblem::construct_path(const map<ProductState, vector<
         const auto& preceding_path = parent_map.at(target_state);
 
         target_state = preceding_path.back();
-
-        if (cached && target_state.get_dfa_state() != start_dfa_state) {
-            // We only want to cache 1-step dfa transitions for now.
-            break;
-        } 
 
         path.insert(path.end(), preceding_path.begin(), preceding_path.end());
     }
@@ -697,96 +714,6 @@ size_t PDDLProblem::get_plan_length() const {
     return domain_path_.size() - 1;
 }
 
-// Old version of subproblem. 
-// pddlboat::ProblemPtr PDDLProblem::create_subproblem(bdd& edge_cond, shared_ptr<PDDLState> start_state) {
-//     // Step 1: Collect required predicates that must hold in all conjunctions
-//     bdd required_predicates_bdd;
-//     auto bound_predicates = collect_bound_predicates(edge_cond, required_predicates_bdd);
-
-//     // If bound_predicates is empty, it means there are no universally required predicates
-//     bool has_required_predicates = !bound_predicates.empty();
-//     bdd simple_disjunction = edge_cond;
-//     bool is_simple_conjunction = false;
-
-//     // Separate constraints and goals based on start state
-//     vector<pddlboat::ExpressionPtr> constraints;
-//     vector<pddlboat::ExpressionPtr> required_goals;
-//     pddlboat::DomainPtr domain = domain_->getPddlboatDomainPtr();
-
-//     // Step 2: Split into constraints and goals if there are required predicates
-//     if (has_required_predicates) {
-//         split_constraints_and_goals(bound_predicates, start_state->getPddlboatStatePtr(), constraints, required_goals);
-
-//         // Step 3: Simplify the edge condition using bdd_restrict
-//         simple_disjunction = bdd_restrict(edge_cond, required_predicates_bdd);
-
-//         // Step 4: Check if the simplified condition is a simple conjunction
-//         is_simple_conjunction = (simple_disjunction == bddtrue);
-//     }
-
-//     // Step 6: Create goals for the subproblem
-//     vector<pddlboat::ExpressionPtr> goals = required_goals;
-//     if (!is_simple_conjunction) {
-//         // Handle the disjunction case
-//         vector<pddlboat::ExpressionPtr> disjunct_goals;
-//         create_disjunct_goals(simple_disjunction, disjunct_goals);
-//         pddlboat::ExpressionPtr disjunct_goals_expr = pddlboat::makeOr(disjunct_goals);
-//         // static_pointer_cast<pddlboat::Expression>(predicate)
-//         pddlboat::ExpressionPtr start_state_expr = static_pointer_cast<pddlboat::Expression>(start_state->getPddlboatStatePtr()->toExpression());
-//         // cout << "Start state expression: " << endl;
-//         // start_state_expr->toPDDL(cout);
-//         // cout << endl << "Disjunctive goal: " << endl;
-//         // disjunct_goals_expr->toPDDL(cout);
-//         // cout << endl;
-//         if (state_satisfies_expression(start_state, disjunct_goals_expr)) {
-//             // cout << "disjunct_goals_expr is true in a start state" <<endl;
-//             // Add it to constraints.
-//             constraints.push_back(disjunct_goals_expr);
-//         } 
-//         // Update goals with disjunctive condition.
-//         goals.push_back(disjunct_goals_expr);
-//     }
-
-//     if (!constraints.empty()) {
-//         // Create a conjunction of all constraints
-//         auto constraints_expr = pddlboat::makeAnd(constraints);
-//         domain = get_domain_with_constraints(constraints_expr, domain);
-//     }
-
-//     // Step 7: Create the final goal as a conjunction of all goals
-//     auto final_goal = pddlboat::makeAnd(goals);
-
-//     // Step 8: Use the new domain to create a new subproblem
-//     auto subproblem = make_shared<pddlboat::Problem>(pddlProblem_->name, domain);
-//     subproblem->objects = pddlProblem_->objects;
-//     subproblem->start = start_state->getPddlboatStatePtr();
-//     subproblem->goal = final_goal;
-
-//     return subproblem;
-// }
-
-// New version
-    // Step 1: Create a goal for the subproblem 
-    // Process bdd corresponding to edge condition for moving to the next DFA state.
-    // 1) Collect required predicates -> turn into required_goals
-    // 2) Separate "required predicates" to get a remaining "disjunct_conditions"
-    // if "required predicates" is empty -> a "simple disjunction" case
-    // if "remaining disjunction" is true -> a "simple conjunction" case
-    // 3) Create a final_goal by conjuncting required_goals and disjunct_conditions
-
-    // Step 2: Deal with constraints on intermediate states
-    // Case 1: (edge_cond || self_edge_cond == bddtrue): self-edge is just a negation of edge condition
-        // Do nothing! No constarints needed.
-    // Case 2: self_edge_cond == bddfalse: no self edge!
-        // find a plan of length 1 that achieves a state that satifies final_goal
-    // Case 3: self_edge_cond is NOT satisfied in out_state
-        // find a plan of length 1 that achieves a state that satifies final_goal || self_edge_goal
-        // If satisfies final_goal, then we are done!
-        // Else, remember the first action in a plan and go to Case 4 
-    // Case 4: self_edge_cond is satisfied in out_state
-        // Create a self_edge_constraint and include it in the domain
-
-    // Step 3: Create subproblem with final_goal and a new "constrained" domain
 vector<pair<shared_ptr<pddlboat::Plan::Step>, pddlboat::ProblemPtr>> PDDLProblem::create_subproblem(bdd& edge_cond, bdd& self_edge_cond, shared_ptr<PDDLState> curr_state) {
     // Get a raw pddlboat::StatePtr.
     auto curr_domain_state = curr_state->getPddlboatStatePtr();

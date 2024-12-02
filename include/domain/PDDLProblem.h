@@ -99,7 +99,7 @@ private:
     bool predicateHoldsInState(const pddlboat::StatePtr& state, const pddlboat::PredicatePtr& predicate);
     void print_bdd(bdd& expr);
 
-    vector<ProductState> construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached=false, size_t start_dfa_state=0);
+    vector<ProductState> construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached=false);
     void enqueue_product_state(map<size_t, priority_queue<pair<int, ProductState>, vector<pair<int, ProductState>>, greater<pair<int, ProductState>>>>& regionQueues, 
     const ProductState& state, int heuristic_cost, size_t dfa_state);
     bool validate_dfa_trace(const vector<size_t>& dfa_trace);
@@ -157,6 +157,9 @@ private:
     int num_of_backtracks_;
     int backtracks_limit_;
     size_t max_num_wrong_dfa_trans_;
+
+    // Cache map: stores DFA trace prefixes to corresponding solution paths.
+    map<vector<size_t>, vector<ProductState>> dfa_trace_cache_;
 };
 
 #endif // PDDL_PROBLEM_H

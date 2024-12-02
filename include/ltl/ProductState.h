@@ -5,6 +5,7 @@
 #include <ostream>
 #include <pddlboat/solver/planner.hpp> // needed for Plan::Step
 #include "DomainState.h"
+#include "PDDLState.h"
 #include "Action.h"
 
 class ProductState {
@@ -20,6 +21,11 @@ public:
     std::shared_ptr<DomainState> get_domain_state() const {
         return domain_state_;
     }
+
+    std::shared_ptr<PDDLState> getPDDLState() {
+        return std::static_pointer_cast<PDDLState>(domain_state_);
+    }
+
 
     size_t get_dfa_state() const {
         return dfa_state_;
