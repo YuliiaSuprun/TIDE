@@ -100,6 +100,8 @@ private:
     void print_bdd(bdd& expr);
 
     vector<ProductState> construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached=false);
+
+    void cache_prefixes(const map<ProductState, vector<ProductState>>& parent_map, ProductState current_state, const vector<size_t>& dfa_trace, size_t min_prefix_length, size_t max_prefix_length);
     void enqueue_product_state(map<size_t, priority_queue<pair<int, ProductState>, vector<pair<int, ProductState>>, greater<pair<int, ProductState>>>>& regionQueues, 
     const ProductState& state, int heuristic_cost, size_t dfa_state);
     bool validate_dfa_trace(const vector<size_t>& dfa_trace);

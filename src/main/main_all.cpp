@@ -135,8 +135,15 @@ int main(int argc, char** argv) {
     common_dir_name = common_dir_name + "/" + domain_name;
     filesystem::create_directory(common_dir_name);
 
+    string overall_stats_doc = "overall_stats";
+    if (cache) {
+        overall_stats_doc += "_cached.txt";
+    } else {
+        overall_stats_doc += "_original.txt";
+    }
+
     // Define the general statistics file path
-    string generalStatsFilePath = common_dir_name + "/overall_stats.txt";
+    string generalStatsFilePath = common_dir_name + "/" + overall_stats_doc;
     // Open the general statistics file in append mode
     ofstream generalStatsFile(generalStatsFilePath, ios::app);
     if (!generalStatsFile.is_open()) {

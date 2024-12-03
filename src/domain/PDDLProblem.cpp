@@ -374,9 +374,8 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
 
     size_t currentRegionIndex = 0;
     size_t maxRegionIndexReached = 0;
-    int max_num_wrong_dfa_trans = 3;
+
     int max_num_repeated_paths = 1;
-    int num_wrong_dfa_trans = 0;
     int num_repeated_paths = 0;
 
     set<ProductState> visited;
@@ -425,6 +424,10 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
     } else {
         visited.insert(start_state);
     }
+
+    // Needed for caching.
+    auto last_prod_state = start_state;
+    size_t minCachedPrefixLength = maxRegionIndexReached + 2;
 
     // Instantiate a subproblem for the first transition
     auto start_subproblems = create_subproblem(dfa_nodes.at(currentRegionIndex + 1)->getParentEdgeCondition(), dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), start_state.getPDDLState());
@@ -525,17 +528,7 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 // Visit the state.
                 visited.insert(next_prod_state);
 
-                // Get a bdd corresponding to last PDDL state.
-                bdd last_domain_state_bdd = domain_manager_->get_state_bdd(last_domain_state);
-                // Get a bdd corresponding to the transition in the DFA.
-                bdd next_edge_cond = dfa_nodes.at(currentRegionIndex+1)->getParentEdgeCondition();
-
-                if (!dfa_manager_->is_transition_valid(next_edge_cond, last_domain_state_bdd)) {
-                    // cout << "ERROR: Transition doesn't satisfy an edge condition for " << curr_dfa_state << "->" << next_dfa_state << endl;
-                    continue;
-                }
-
-                bool valid_dfa_state = true;
+                // bool valid_dfa_state = true;
                 vector<ProductState> product_path;
 
                 // Iterate over the steps to create corresponding ProductStates
@@ -546,34 +539,12 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                     // Create a PDDLState from the prior state of the step
                     auto domain_state = make_shared<PDDLState>(current_step->prior->clone());
 
-                    // Get a BDD corresponding to this PDDL state
-                    bdd domain_state_bdd = domain_manager_->get_state_bdd(domain_state);
-
-                    // Verify that domain states correspond to the current DFA state
-                    // TODO: double check what this does
-                    if (!((i == 0) || dfa_manager_->is_transition_valid(dfa_nodes.at(currentRegionIndex)->getSelfEdgeCondition(), domain_state_bdd))) {
-                        valid_dfa_state = false;
-                    }
-
                     // Create a ProductState with the Plan::Step and push it to the product_path_
                     product_path.emplace_back(domain_state, curr_dfa_state, current_step);
                 }
-
-                // Implement max threshold for the number of wrong transitions.
-                if (!valid_dfa_state) {
-                    num_wrong_dfa_trans++;
-                    // cout << "ERROR: Solution path goes beyond the dfa state = " << curr_dfa_state << endl;
-                    if (num_wrong_dfa_trans >= max_num_wrong_dfa_trans) {
-                        // cerr << "Failed to solve within the same dfa region!" << endl;
-                        regionSubproblems.erase(curr_dfa_state);
-                    }
-                    continue;
-                }
-
                 // We were able to get to the next DFA state in a trace!
                 // cout << "Succesfully realized this transition: " << curr_dfa_state << "=>" << next_dfa_state << endl;
 
-                num_wrong_dfa_trans = 0;
                 num_repeated_paths = 0;
 
                 // Add it to the parent map to be able to backtrack.
@@ -582,14 +553,12 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
                 // Update the cost to 0 based on the success of the transition.
                 dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(currentRegionIndex + 1), SUCCESS_COST);
 
+                // Inefficient version of caching
                 // Add it to the cache for future reuse.
-                if (cache_) {
-                    vector<size_t> prefix(dfa_trace.begin(), dfa_trace.begin() + currentRegionIndex + 2);
-                    dfa_trace_cache_[prefix] = construct_path(parent_map, next_prod_state, true);
-                    // cout << "Cached solution path for DFA prefix: ";
-                    // for (const auto& state : prefix) cout << state << " ";
-                    // cout << endl;
-                }
+                // if (cache_) {
+                //     vector<size_t> prefix(dfa_trace.begin(), dfa_trace.begin() + currentRegionIndex + 2);
+                //     dfa_trace_cache_[prefix] = construct_path(parent_map, next_prod_state, true);
+                // }
             }
         }
 
@@ -598,12 +567,28 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         // Remember the last dfa state we were able to reach.
         if (maxRegionIndexReached < currentRegionIndex) {
             maxRegionIndexReached = currentRegionIndex;
+            last_prod_state = next_prod_state;
         }
         // Check if it's the accepting state (last in the dfa trace).
         // If so, we have a solution!
         if (currentRegionIndex == dfa_trace.size() - 1) {
             // Backtrack to get the full path.
             product_path_ = construct_path(parent_map, next_prod_state);
+            // // Check for duplicates in product_path_
+            // std::set<ProductState> unique_states;
+            // bool has_duplicates = false;
+            // for (const auto& state : product_path_) {
+            //     if (!unique_states.insert(state).second) {
+            //         has_duplicates = true;
+            //         cout << "Dublicate state: " << state.get_dfa_state() << endl;
+            //     }
+            // }
+
+            // if (has_duplicates) {
+            //     cerr << "ERROR: Duplicate elements found in product_path_!" << endl;
+            // } else {
+            //     cout << "No duplicates found in product_path_." << endl;
+            // }
             save_paths();
             return;
         }
@@ -613,9 +598,71 @@ void PDDLProblem::realize_dfa_trace_with_planner(shared_ptr<DFANode>& end_trace_
         regionSubproblems.insert({next_dfa_state, next_subproblems});
     } 
     // We failed to realize the provided dfa trace.
+    // cout << "Failed transition: " << dfa_trace.at(maxRegionIndexReached) << "=>" << dfa_trace.at(maxRegionIndexReached + 1) << endl;
     // Update the cost for the dfa transition we couldn't realize.
     dfa_manager_->update_dfa_transition_cost(dfa_nodes.at(maxRegionIndexReached + 1), FAILURE_COST);
+
+    // Cache all successfully realized prefixes if caching is enabled.
+    if (cache_) {
+        cache_prefixes(parent_map, last_prod_state, dfa_trace, minCachedPrefixLength, maxRegionIndexReached + 1);
+    }
 }
+
+void PDDLProblem::cache_prefixes(const map<ProductState, vector<ProductState>>& parent_map, 
+                                 ProductState current_state, 
+                                 const vector<size_t>& dfa_trace, 
+                                 size_t min_prefix_length,
+                                 size_t max_prefix_length) {
+    if (min_prefix_length > max_prefix_length) {
+        return;
+    }                             
+    // Vector to store target states for each prefix length
+    vector<ProductState> target_states;
+
+    // Path fragments for caching
+    map<vector<size_t>, vector<ProductState>> cache_fragments;
+
+    while (parent_map.find(current_state) != parent_map.end()) {
+        // Cache the current state for its corresponding prefix
+        vector<size_t> curr_prefix(dfa_trace.begin(), dfa_trace.begin() + max_prefix_length - target_states.size());
+        if (dfa_trace_cache_.find(curr_prefix) != dfa_trace_cache_.end()) {
+            // Get the corresponding path that leads to the current_state
+            auto preceding_path = dfa_trace_cache_.at(curr_prefix);
+            // Remove the first element
+            preceding_path.erase(preceding_path.begin());
+
+            // Append the preceding_path to all cached fragments
+            for (auto& [prefix, cached_path] : cache_fragments) {
+                cached_path.insert(cached_path.end(), preceding_path.begin(), preceding_path.end());
+            }
+            break;
+        }
+
+        // Cache this prefix
+        cache_fragments[curr_prefix] = {current_state};
+
+        // Get the corresponding path that leads to the current_state
+        // Note that preceding_path does NOT include current_state!
+        const auto& preceding_path = parent_map.at(current_state);
+
+        // Append the preceding_path to all cached fragments
+        for (auto& [prefix, cached_path] : cache_fragments) {
+            cached_path.insert(cached_path.end(), preceding_path.begin(), preceding_path.end());
+        }
+
+        // Add current_state to the target_states
+        target_states.push_back(current_state);
+
+        // Backtrack to the "next" state
+        current_state = preceding_path.back();
+    }
+
+    // Finalize all cached fragments into dfa_trace_cache_
+    for (auto& [prefix, cached_path] : cache_fragments) {
+        dfa_trace_cache_[prefix] = cached_path;
+    }
+}
+
 
 vector<ProductState> PDDLProblem::construct_path(const map<ProductState, vector<ProductState>>& parent_map, ProductState target_state, bool cached) {
     vector<ProductState> path;
