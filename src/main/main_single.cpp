@@ -145,6 +145,22 @@ int main(int argc, char** argv) {
     dir_name = dir_name + "/" + domain_name;
     filesystem::create_directory(dir_name);
 
+    string overall_stats_doc = "overall_stats";
+    if (cache) {
+        overall_stats_doc += "_cached.txt";
+    } else {
+        overall_stats_doc += "_original.txt";
+    }
+
+    // Define the general statistics file path
+    string generalStatsFilePath = dir_name + "/" + overall_stats_doc;
+    // Open the general statistics file in append mode
+    ofstream generalStatsFile(generalStatsFilePath, ios::app);
+    if (!generalStatsFile.is_open()) {
+        cerr << "Failed to open general stats file: " << generalStatsFilePath << endl;
+        return EXIT_FAILURE;
+    }
+
     // Create the problem subdirectory if it doesn't exist
     dir_name = dir_name + "/" + problem_name;
     filesystem::create_directory(dir_name);
@@ -208,6 +224,14 @@ int main(int argc, char** argv) {
     double averageExpandedNodes = static_cast<double>(totalExpandedNodes) / numRuns;
     double averagePlanLength = static_cast<double>(totalPlanLength) / numRuns;
     double averageNumOfBacktracks = static_cast<double>(totalNumOfBacktracks) / numRuns;
+
+    // Append summary statistics to the general stats file
+    generalStatsFile << "For " << problem_name << " (" << numRuns << " runs): " << endl;
+    generalStatsFile << "Average total time: " << averageTotalTime << " seconds" << endl;
+    generalStatsFile << "Average plan length: " << averagePlanLength << endl;
+    generalStatsFile << "Average number of backtracks: " << averageNumOfBacktracks << endl;
+    generalStatsFile << "-----------------------------------------------" << endl;
+
     printStats(std::cout, numRuns, averageDFATime, firstRunDFATime, averageDFATimeNoFirst, averageSearchTime, averageTotalTime, averageExpandedNodes, averagePlanLength, averageNumOfBacktracks);
 
     // Create the stats file
@@ -225,6 +249,9 @@ int main(int argc, char** argv) {
 
     // Close the file
     statsFile.close();
+
+    // Close the general stats file
+    generalStatsFile.close();
 
     return 0;
 }
