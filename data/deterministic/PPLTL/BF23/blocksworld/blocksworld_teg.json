@@ -1,4 +1,13 @@
 {
+    "p2": "O(on_b2_b1) & O(on_b1_b2)",
+    "p3": "O(on_b3_b2 & Y(O(on_b2_b1))) & O(on_b1_b2 & Y(O(on_b2_b3)))",
+    "p33": "O(on_b3_b2 & Y(Y(on_b2_b1))) & O(on_b1_b2 & Y(Y(on_b2_b3)))",
+    "p4": "O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4)))))",
+    "p34": "O(on_b4_b3 & Y(Y(on_b3_b2 & Y(Y(on_b2_b1))))) & O(on_b1_b2 & Y(Y(on_b2_b3 & Y(Y(on_b3_b4)))))",
+    "p5": "O(on_b5_b4 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5)))))))",
+    "p35": "O(on_b5_b4 & Y(Y(on_b3_b2 & Y(Y(on_b2_b1))))) & O(on_b1_b2 & Y(Y(on_b2_b3 & Y(Y(on_b3_b4 & Y(Y(on_b4_b5)))))))",
+    "p6": "O(on_b6_b5 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5 & Y(O(on_b5_b6)))))))))",
+    "p7": "O(on_b7_b6 & Y(O(on_b5_b4 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5 & Y(O(on_b5_b6 & Y(O(on_b6_b7)))))))))))",
     "p10": "O(on_b6_b5 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b8_b7 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b10_b9 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5 & Y(O(on_b5_b6 & Y(O(on_b6_b7 & Y(O(on_b7_b8 & Y(O(on_b8_b9 & Y(O(on_b9_b10)))))))))))))))))",
     "p11": "O(on_b5_b4 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b7_b6 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b9_b8 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b11_b10 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5 & Y(O(on_b5_b6 & Y(O(on_b6_b7 & Y(O(on_b7_b8 & Y(O(on_b8_b9 & Y(O(on_b9_b10 & Y(O(on_b10_b11)))))))))))))))))))",
     "p12": "O(on_b6_b5 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b8_b7 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b10_b9 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b12_b11 & Y(O(on_b4_b3 & Y(O(on_b3_b2 & Y(O(on_b2_b1))))))) & O(on_b1_b2 & Y(O(on_b2_b3 & Y(O(on_b3_b4 & Y(O(on_b4_b5 & Y(O(on_b5_b6 & Y(O(on_b6_b7 & Y(O(on_b7_b8 & Y(O(on_b8_b9 & Y(O(on_b9_b10 & Y(O(on_b10_b11 & Y(O(on_b11_b12)))))))))))))))))))))",
