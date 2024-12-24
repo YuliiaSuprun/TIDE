@@ -76,10 +76,10 @@ public:
     static string extract_domain_name(const string &path);
 
     void write_solution_to_file(const string& file_path) const;
+    static pddlboat::ProblemPtr parseProblem(const std::string& problemFile, const pddlboat::DomainPtr& domainPtr);
 
 private:
     void extract_names(const string &problemFile);
-    void parseProblem(const string& problemFile, shared_ptr<PDDLDomain> domainPtr);
     void save_paths();
     void realize_dfa_trace(shared_ptr<DFANode>& end_trace_node);
     void realize_dfa_trace_manually(shared_ptr<DFANode>& end_trace_node);

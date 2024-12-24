@@ -35,7 +35,8 @@ use_landmarks_(use_landmarks), hamming_dist_(hamming_dist), save_dfa_(save_dfa),
     // Extracting the problem name
     extract_names(problemFile);
 
-    parseProblem(problemFile, domainPtr);
+    auto pddlboatDomainPtr = domainPtr->getPddlboatDomainPtr();
+    pddlProblem_ = parseProblem(problemFile, pddlboatDomainPtr);
     // cout << "Problem was parsed!!!" << endl;
     // pddlProblem_->toPDDL(std::cout) << std::endl;
 
@@ -139,16 +140,16 @@ PDDLProblem::~PDDLProblem() {
     // When the reference count drops to zero, the destructor for the spot::bdd_dict will be triggered.
 }
 
-void PDDLProblem::parseProblem(const std::string& problemFile, std::shared_ptr<PDDLDomain> domainPtr) {
-    auto pddlboatDomainPtr = domainPtr->getPddlboatDomainPtr();
-
+pddlboat::ProblemPtr PDDLProblem::parseProblem(const std::string& problemFile, const pddlboat::DomainPtr& domainPtr) {
+    // Parse the PDDL problem into an AST
     pddlboat::ast::Problem problem_ast;
     if (!pddlboat::parseFile(problemFile, problem_ast)) {
         throw std::runtime_error("Failed to parse PDDL problem file: " + problemFile);
     }
 
     try {
-        pddlProblem_ = pddlboat::toProblem(problem_ast, pddlboatDomainPtr);
+        // Translate the AST into a pddlboat::Problem using the provided domain
+        return pddlboat::toProblem(problem_ast, domainPtr);
     } catch (const std::exception& e) {
         throw std::runtime_error("Exception translating problem: " + std::string(e.what()));
     }

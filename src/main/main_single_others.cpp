@@ -27,7 +27,6 @@
 using namespace std;
 
 // Example of the command
-// ./run_single_p4p.sh /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/PPLTL/TB15/blocksworld/domain.pddl /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/PPLTL/TB15/blocksworld/a03.pddl /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json 1 --planner fd --search lama
 
 // Example command to run plan4past:
 // plan4past -d examples/pddl/domain.pddl -p examples/pddl/p-0.pddl -g "ontable_c & O(on_b_a)" -od output_domain.pddl -op output_problem.pddl
@@ -73,7 +72,7 @@ void removeFilesWithPrefix(const std::string& directory, const std::string& pref
 
 int main(int argc, char** argv) {
     if (argc < 4) {
-        cerr << "Usage: " << argv[0] << " <PDDL Domain File> <PDDL Problem File> <Number of Runs> [--method <'exp', 'poly', 'plan4past'>] [--search <'lama-full', 'lama-first'>] [--goal <Goal JSON File>] [--timeout <in ms>]" << endl;
+        cerr << "Usage: " << argv[0] << " <PDDL Domain File> <PDDL Problem File> <Number of Runs> [--method <'exp', 'poly', 'plan4past', 'fond4ltlf'>] [--search <'lama-full', 'lama-first'>] [--goal <Goal JSON File>] [--timeout <in ms>]" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -111,7 +110,7 @@ int main(int argc, char** argv) {
     }
 
     if (method.empty()) {
-        cerr << "ERROR: No method provided. Use --method <method_name>. Options: exp, poly, plan4past" << endl;
+        cerr << "ERROR: No method provided. Use --method <method_name>. Options: exp, poly, plan4past, fond4ltlf" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -120,12 +119,13 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    if (method == "plan4past") {
+    if (method == "plan4past" || method == "fond4ltlf") {
         if (goalJsonFilePath.empty()) {
-            cerr << "ERROR: No goal JSON file provided for the plan4past method. Use --goal <Goal JSON File>" << endl;
+            cerr << "ERROR: No goal JSON file provided for the " << method << " method. Use --goal <Goal JSON File>" << endl;
             exit(EXIT_FAILURE);
         }
-        // Load the goal expression from the JSON file
+
+        // Attempt to load goal expression from a goal JSON file.
         try {
             ifstream jsonFile(goalJsonFilePath);
             if (!jsonFile.is_open()) {
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
     double totalSearchTime = 0;
     size_t totalPlanLength = 0;
     size_t syncActionsCount = 0; // Count of synchronization actions
-    size_t concisePlanLength = 0; // For Poly
+    size_t concisePlanLength = 0; // For Poly and fond4ltlf
 
     string currentPath = filesystem::current_path().string();
 
@@ -217,6 +217,8 @@ int main(int argc, char** argv) {
     if (method == "plan4past") {
         // Construct `plan4past` command
         translateCmd = "plan4past -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\"" + mapFileArgString + " -od " + outputDomainPath + " -op " + outputProblemPath + " > /dev/null 2>&1";
+    } else if (method == "fond4ltlf") {
+        translateCmd = "fond4ltlf -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\" -outd " + outputDomainPath + " -outp " + outputProblemPath + " > /dev/null 2>&1";
     } else if (method == "exp") {
         // Run a script from ltl_compilations/pddlTEG2pddl directory
         translateCmd = "cd competitors/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
@@ -276,9 +278,18 @@ int main(int argc, char** argv) {
                 string line;
                 // Regex to match the line with the cost information
                 regex costRegex("; cost = ([0-9]+)");
-                // Regex to identify synchronization actions 
-                // (lines starting with "(o_"
-                regex syncActionRegex("^\\(o_.*\\)");
+                // Select the appropriate sync action regex based on the method
+                regex syncActionRegex;
+                if (method == "poly") {
+                    // poly sync actions start with "(o_"
+                    syncActionRegex = regex("^\\(o_.*\\)"); 
+                } else if (method == "fond4ltlf") {
+                    // fond4ltlf sync actions start with "(trans-"
+                    syncActionRegex = regex("^\\(trans-.*\\)"); 
+                } else {
+                    // Matches nothing, effectively skips the check
+                    syncActionRegex = regex("$a");
+                }
                 // Process each line from the plan file
                 while (getline(sasPlanFile, line)) {
                     // Copy the contents from plan file to planFilePath
@@ -300,7 +311,7 @@ int main(int argc, char** argv) {
             }
             sasPlanFile.close();
 
-            if (method == "poly") {
+            if (method == "poly" || method == "fond4ltlf") {
                 // Calculate the normal plan length by excluding sync actions
                 concisePlanLength = totalPlanLength - syncActionsCount;
             }

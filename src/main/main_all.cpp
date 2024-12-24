@@ -162,6 +162,11 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        if (problemFilePath.find("s03") == string::npos) {
+            // Skip it.
+            continue;
+        }
+
         cout << "Solving " << problemFilePath << "..." << endl;
 
         // Extract a problem name.
