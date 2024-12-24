@@ -162,10 +162,10 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        if (problemFilePath.find("s03") == string::npos) {
-            // Skip it.
-            continue;
-        }
+        // if (problemFilePath.find("s03") == string::npos) {
+        //     // Skip it.
+        //     continue;
+        // }
 
         cout << "Solving " << problemFilePath << "..." << endl;
 
