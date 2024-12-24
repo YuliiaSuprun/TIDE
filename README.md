@@ -83,3 +83,28 @@ make
 ```
 ./scripts/run_others_all_in_dir.sh data/deterministic/PPLTL/TB15/blocksworld 3 --method plan4past --search lama-first --goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
 ```
+## Installation of FOND4LTLf
+1. Activate Your Conda Environment
+```
+conda activate spotenv
+```
+2. Install Dependencies
+```
+conda install pip
+pip install --upgrade pip setuptools wheel
+pip install ltlf2dfa click ply
+```
+3. Install FOND4LTLf in the Conda Environment
+```
+cd FOND4LTLf
+pip install .
+```
+4. Test the Installation
+```
+python3 -m pip show fond4ltlf
+fond4ltlf --help
+```
+5. Install Mona fro LTLf-to-DFA conversion.
+```
+sudo apt install mona
+```
