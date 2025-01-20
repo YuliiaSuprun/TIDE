@@ -10,7 +10,7 @@ BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEG
 DOMAIN_FILE="$BASE_DIR/domain.pddl"
 
 # Iterate from p10 to p30
-for i in {5..20}; do
+for i in {4..4}; do
     PROBLEM_FILE="$BASE_DIR/s${i}-0.pddl"
     echo "Solving problem: $PROBLEM_FILE"
 

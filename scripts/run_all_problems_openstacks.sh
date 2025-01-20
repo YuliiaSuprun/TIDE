@@ -15,7 +15,7 @@ for i in $(seq -f "%02g" 1 5); do  # '-w' ensures zero-padded numbers
     echo "Solving problem: $PROBLEM_FILE with domain: $DOMAIN_FILE"
 
     # Call the single problem solver
-    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 10 -f -h --planner fd --search lama-full
+    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 10 -f -h -c --planner fd --search lama-full
 
     # Check the exit code of the previous command
     if [ $? -ne 0 ]; then

@@ -6,16 +6,16 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/Documents/Programming/yuliia/Resea
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/anaconda3/envs/spotenv/lib
 
 # Set the base directory path for your problems and domain file
-BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/data/deterministic/LTLf/BF23/blocksworld"
+BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/data/deterministic/LTLf/S24/blocksworld"
 DOMAIN_FILE="$BASE_DIR/domain.pddl"
 
 # Iterate from p10 to p30
-for i in {29..29}; do
-    PROBLEM_FILE="$BASE_DIR/p${i}.pddl"
+for i in {3..30}; do
+    PROBLEM_FILE="$BASE_DIR/m${i}.pddl"
     echo "Solving problem: $PROBLEM_FILE"
 
     # Call the single problem solver
-    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 3 -f -h --planner fd --search lama
+    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 1 -f -h -c --planner fd --search lama-first
 
     # Check the exit code of the previous command
     if [ $? -ne 0 ]; then

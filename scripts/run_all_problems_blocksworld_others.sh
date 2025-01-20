@@ -6,16 +6,17 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/Documents/Programming/yuliia/Resea
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/anaconda3/envs/spotenv/lib
 
 # Set the base directory path for your problems and domain file
-BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/data/deterministic/PPLTL/BF23/blocksworld"
+# BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/data/deterministic/FOND4LTLf/S24/blocksworld"
+BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/data/deterministic/FOND4LTLf/S24/blocksworld"
 DOMAIN_FILE="$BASE_DIR/domain.pddl"
 
 # Iterate from p10 to p30
-for i in {10..30}; do
-    PROBLEM_FILE="$BASE_DIR/p${i}.pddl"
+for i in {3..25}; do
+    PROBLEM_FILE="$BASE_DIR/t${i}.pddl"
     echo "Solving problem: $PROBLEM_FILE"
 
     # Call the single problem solver
-    ./bin/main_single_others "$DOMAIN_FILE" "$PROBLEM_FILE" 1 --method "$@" --timeout 3600 --goal "$BASE_DIR/blocksworld_teg.json"
+    ./bin/main_single_others "$DOMAIN_FILE" "$PROBLEM_FILE" 1 --method "$@" --search lama-first --goal "$BASE_DIR/blocksworld_teg2.json"
 
     # Check the exit code of the previous command
     if [ $? -ne 0 ]; then

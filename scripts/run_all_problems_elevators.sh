@@ -10,12 +10,12 @@ BASE_DIR="$HOME/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEG
 DOMAIN_FILE="$BASE_DIR/domain.pddl"
 
 # Iterate from s2-0 to s30-0
-for i in {21..30}; do
+for i in {2..15}; do
     PROBLEM_FILE="$BASE_DIR/s${i}-0.pddl"
     echo "Solving problem: $PROBLEM_FILE"
 
     # Call the single problem solver
-    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 1 -f -h --planner fd --search lama-first
+    ./bin/main_single "$DOMAIN_FILE" "$PROBLEM_FILE" 1 -f -h --planner fd --search lama-first --save_dfa
 
     # Check the exit code of the previous command
     if [ $? -ne 0 ]; then

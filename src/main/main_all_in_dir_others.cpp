@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
             // Weird map file. Skip it.
             continue;
         }
-        // if (problemFilePath.find("s03") == string::npos) {
+        // if (problemFilePath.find("r0") != string::npos) {
         //     // Skip
         //     continue;
         // }
@@ -231,8 +231,7 @@ int main(int argc, char** argv) {
         string outputDomainPath = dir_name + "/output_domain.pddl";
         string outputProblemPath = dir_name + "/output_problem.pddl";
 
-        // string mapFilePath = directoryPath + "/" + problem_name + ".map";
-        string mapFilePath = directoryPath + "/main1.map";
+        string mapFilePath = directoryPath + "/" + problem_name + ".map";
 
         string mapFileArgString; // Empty by default
         if (filesystem::exists(mapFilePath)) {
