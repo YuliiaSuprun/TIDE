@@ -7,6 +7,6 @@
     "e05": "O(O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(shipped-o4) & O(shipped-o5))",
     "f05": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(shipped-o4) & O(shipped-o5)",
     "f03": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3)",
-    "g02": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(strt-o2 & !Y(O(strt-o1)))",
-    "g03": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(strt-o2 & !Y(O(strt-o1))) & O(strt-o3 & !Y(O(strt-o2)))"
+    "g02": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(initiated-o2 & !Y(O(initiated-o1)))",
+    "g03": "O(shipped-o1) & O(shipped-o2) & O(shipped-o3) & O(initiated-o2 & !Y(O(initiated-o1))) & O(initiated-o3 & !Y(O(initiated-o2)))"
 }

@@ -9,11 +9,11 @@
 (MACHINE-CONFIGURED-P4)
 (MACHINE-CONFIGURED-P5)
 (STACKS-AVAIL-N1)
-(STARTED-O1)
-(STARTED-O2)
-(STARTED-O3)
-(STARTED-O4)
-(STARTED-O5)
+(INITIATED-O1)
+(INITIATED-O2)
+(INITIATED-O3)
+(INITIATED-O4)
+(INITIATED-O5)
 (STACKS-AVAIL-N2)
 (MADE-P1)
 (MADE-P2)
@@ -46,8 +46,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N5)
 )
 :effect
@@ -63,8 +63,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N4)
 )
 :effect
@@ -80,8 +80,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N3)
 )
 :effect
@@ -97,8 +97,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N5)
 )
 :effect
@@ -114,8 +114,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N4)
 )
 :effect
@@ -131,8 +131,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N3)
 )
 :effect
@@ -148,8 +148,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N5)
 )
 :effect
@@ -165,8 +165,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N4)
 )
 :effect
@@ -182,8 +182,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N3)
 )
 :effect
@@ -199,8 +199,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N5)
 )
 :effect
@@ -216,8 +216,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N4)
 )
 :effect
@@ -233,8 +233,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N3)
 )
 :effect
@@ -250,8 +250,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N5)
 )
 :effect
@@ -267,8 +267,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N4)
 )
 :effect
@@ -284,8 +284,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N3)
 )
 :effect
@@ -341,7 +341,7 @@
 )
 :effect
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (STACKS-AVAIL-N1)
 (not (WAITING-O5))
 (not (STACKS-AVAIL-N2))
@@ -356,7 +356,7 @@
 )
 :effect
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (STACKS-AVAIL-N1)
 (not (WAITING-O4))
 (not (STACKS-AVAIL-N2))
@@ -371,7 +371,7 @@
 )
 :effect
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (STACKS-AVAIL-N1)
 (not (WAITING-O3))
 (not (STACKS-AVAIL-N2))
@@ -386,7 +386,7 @@
 )
 :effect
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (STACKS-AVAIL-N1)
 (not (WAITING-O2))
 (not (STACKS-AVAIL-N2))
@@ -401,7 +401,7 @@
 )
 :effect
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (STACKS-AVAIL-N1)
 (not (WAITING-O1))
 (not (STACKS-AVAIL-N2))
@@ -416,7 +416,7 @@
 )
 :effect
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (STACKS-AVAIL-N2)
 (not (WAITING-O5))
 (not (STACKS-AVAIL-N3))
@@ -431,7 +431,7 @@
 )
 :effect
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (STACKS-AVAIL-N2)
 (not (WAITING-O4))
 (not (STACKS-AVAIL-N3))
@@ -446,7 +446,7 @@
 )
 :effect
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (STACKS-AVAIL-N2)
 (not (WAITING-O3))
 (not (STACKS-AVAIL-N3))
@@ -461,7 +461,7 @@
 )
 :effect
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (STACKS-AVAIL-N2)
 (not (WAITING-O2))
 (not (STACKS-AVAIL-N3))
@@ -476,7 +476,7 @@
 )
 :effect
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (STACKS-AVAIL-N2)
 (not (WAITING-O1))
 (not (STACKS-AVAIL-N3))
@@ -491,7 +491,7 @@
 )
 :effect
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (STACKS-AVAIL-N3)
 (not (WAITING-O5))
 (not (STACKS-AVAIL-N4))
@@ -506,7 +506,7 @@
 )
 :effect
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (STACKS-AVAIL-N3)
 (not (WAITING-O4))
 (not (STACKS-AVAIL-N4))
@@ -521,7 +521,7 @@
 )
 :effect
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (STACKS-AVAIL-N3)
 (not (WAITING-O3))
 (not (STACKS-AVAIL-N4))
@@ -536,7 +536,7 @@
 )
 :effect
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (STACKS-AVAIL-N3)
 (not (WAITING-O2))
 (not (STACKS-AVAIL-N4))
@@ -551,7 +551,7 @@
 )
 :effect
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (STACKS-AVAIL-N3)
 (not (WAITING-O1))
 (not (STACKS-AVAIL-N4))
@@ -566,7 +566,7 @@
 )
 :effect
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (STACKS-AVAIL-N4)
 (not (WAITING-O5))
 (not (STACKS-AVAIL-N5))
@@ -581,7 +581,7 @@
 )
 :effect
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (STACKS-AVAIL-N4)
 (not (WAITING-O4))
 (not (STACKS-AVAIL-N5))
@@ -596,7 +596,7 @@
 )
 :effect
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (STACKS-AVAIL-N4)
 (not (WAITING-O3))
 (not (STACKS-AVAIL-N5))
@@ -611,7 +611,7 @@
 )
 :effect
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (STACKS-AVAIL-N4)
 (not (WAITING-O2))
 (not (STACKS-AVAIL-N5))
@@ -626,7 +626,7 @@
 )
 :effect
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (STACKS-AVAIL-N4)
 (not (WAITING-O1))
 (not (STACKS-AVAIL-N5))
@@ -916,7 +916,7 @@
 :parameters ()
 :precondition
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (MADE-P4)
 (MADE-P2)
 (STACKS-AVAIL-N4)
@@ -926,14 +926,14 @@
 (STACKS-AVAIL-N5)
 (SHIPPED-O5)
 (not (STACKS-AVAIL-N4))
-(not (STARTED-O5))
+(not (INITIATED-O5))
 )
 )
 (:action SHIP-ORDER-O5-N3-N4
 :parameters ()
 :precondition
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (MADE-P4)
 (MADE-P2)
 (STACKS-AVAIL-N3)
@@ -943,14 +943,14 @@
 (STACKS-AVAIL-N4)
 (SHIPPED-O5)
 (not (STACKS-AVAIL-N3))
-(not (STARTED-O5))
+(not (INITIATED-O5))
 )
 )
 (:action SHIP-ORDER-O5-N2-N3
 :parameters ()
 :precondition
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (MADE-P4)
 (MADE-P2)
 (STACKS-AVAIL-N2)
@@ -960,14 +960,14 @@
 (STACKS-AVAIL-N3)
 (SHIPPED-O5)
 (not (STACKS-AVAIL-N2))
-(not (STARTED-O5))
+(not (INITIATED-O5))
 )
 )
 (:action SHIP-ORDER-O5-N1-N2
 :parameters ()
 :precondition
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (MADE-P4)
 (MADE-P2)
 (STACKS-AVAIL-N1)
@@ -977,14 +977,14 @@
 (STACKS-AVAIL-N2)
 (SHIPPED-O5)
 (not (STACKS-AVAIL-N1))
-(not (STARTED-O5))
+(not (INITIATED-O5))
 )
 )
 (:action SHIP-ORDER-O5-N0-N1
 :parameters ()
 :precondition
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (MADE-P4)
 (MADE-P2)
 (STACKS-AVAIL-N0)
@@ -994,14 +994,14 @@
 (STACKS-AVAIL-N1)
 (SHIPPED-O5)
 (not (STACKS-AVAIL-N0))
-(not (STARTED-O5))
+(not (INITIATED-O5))
 )
 )
 (:action SHIP-ORDER-O4-N4-N5
 :parameters ()
 :precondition
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (MADE-P5)
 (MADE-P3)
 (STACKS-AVAIL-N4)
@@ -1011,14 +1011,14 @@
 (STACKS-AVAIL-N5)
 (SHIPPED-O4)
 (not (STACKS-AVAIL-N4))
-(not (STARTED-O4))
+(not (INITIATED-O4))
 )
 )
 (:action SHIP-ORDER-O4-N3-N4
 :parameters ()
 :precondition
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (MADE-P5)
 (MADE-P3)
 (STACKS-AVAIL-N3)
@@ -1028,14 +1028,14 @@
 (STACKS-AVAIL-N4)
 (SHIPPED-O4)
 (not (STACKS-AVAIL-N3))
-(not (STARTED-O4))
+(not (INITIATED-O4))
 )
 )
 (:action SHIP-ORDER-O4-N2-N3
 :parameters ()
 :precondition
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (MADE-P5)
 (MADE-P3)
 (STACKS-AVAIL-N2)
@@ -1045,14 +1045,14 @@
 (STACKS-AVAIL-N3)
 (SHIPPED-O4)
 (not (STACKS-AVAIL-N2))
-(not (STARTED-O4))
+(not (INITIATED-O4))
 )
 )
 (:action SHIP-ORDER-O4-N1-N2
 :parameters ()
 :precondition
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (MADE-P5)
 (MADE-P3)
 (STACKS-AVAIL-N1)
@@ -1062,14 +1062,14 @@
 (STACKS-AVAIL-N2)
 (SHIPPED-O4)
 (not (STACKS-AVAIL-N1))
-(not (STARTED-O4))
+(not (INITIATED-O4))
 )
 )
 (:action SHIP-ORDER-O4-N0-N1
 :parameters ()
 :precondition
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (MADE-P5)
 (MADE-P3)
 (STACKS-AVAIL-N0)
@@ -1079,14 +1079,14 @@
 (STACKS-AVAIL-N1)
 (SHIPPED-O4)
 (not (STACKS-AVAIL-N0))
-(not (STARTED-O4))
+(not (INITIATED-O4))
 )
 )
 (:action SHIP-ORDER-O3-N4-N5
 :parameters ()
 :precondition
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (MADE-P5)
 (MADE-P1)
 (STACKS-AVAIL-N4)
@@ -1096,14 +1096,14 @@
 (STACKS-AVAIL-N5)
 (SHIPPED-O3)
 (not (STACKS-AVAIL-N4))
-(not (STARTED-O3))
+(not (INITIATED-O3))
 )
 )
 (:action SHIP-ORDER-O3-N3-N4
 :parameters ()
 :precondition
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (MADE-P5)
 (MADE-P1)
 (STACKS-AVAIL-N3)
@@ -1113,14 +1113,14 @@
 (STACKS-AVAIL-N4)
 (SHIPPED-O3)
 (not (STACKS-AVAIL-N3))
-(not (STARTED-O3))
+(not (INITIATED-O3))
 )
 )
 (:action SHIP-ORDER-O3-N2-N3
 :parameters ()
 :precondition
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (MADE-P5)
 (MADE-P1)
 (STACKS-AVAIL-N2)
@@ -1130,14 +1130,14 @@
 (STACKS-AVAIL-N3)
 (SHIPPED-O3)
 (not (STACKS-AVAIL-N2))
-(not (STARTED-O3))
+(not (INITIATED-O3))
 )
 )
 (:action SHIP-ORDER-O3-N1-N2
 :parameters ()
 :precondition
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (MADE-P5)
 (MADE-P1)
 (STACKS-AVAIL-N1)
@@ -1147,14 +1147,14 @@
 (STACKS-AVAIL-N2)
 (SHIPPED-O3)
 (not (STACKS-AVAIL-N1))
-(not (STARTED-O3))
+(not (INITIATED-O3))
 )
 )
 (:action SHIP-ORDER-O3-N0-N1
 :parameters ()
 :precondition
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (MADE-P5)
 (MADE-P1)
 (STACKS-AVAIL-N0)
@@ -1164,14 +1164,14 @@
 (STACKS-AVAIL-N1)
 (SHIPPED-O3)
 (not (STACKS-AVAIL-N0))
-(not (STARTED-O3))
+(not (INITIATED-O3))
 )
 )
 (:action SHIP-ORDER-O2-N4-N5
 :parameters ()
 :precondition
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (MADE-P4)
 (MADE-P3)
 (STACKS-AVAIL-N4)
@@ -1181,14 +1181,14 @@
 (STACKS-AVAIL-N5)
 (SHIPPED-O2)
 (not (STACKS-AVAIL-N4))
-(not (STARTED-O2))
+(not (INITIATED-O2))
 )
 )
 (:action SHIP-ORDER-O2-N3-N4
 :parameters ()
 :precondition
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (MADE-P4)
 (MADE-P3)
 (STACKS-AVAIL-N3)
@@ -1198,14 +1198,14 @@
 (STACKS-AVAIL-N4)
 (SHIPPED-O2)
 (not (STACKS-AVAIL-N3))
-(not (STARTED-O2))
+(not (INITIATED-O2))
 )
 )
 (:action SHIP-ORDER-O2-N2-N3
 :parameters ()
 :precondition
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (MADE-P4)
 (MADE-P3)
 (STACKS-AVAIL-N2)
@@ -1215,14 +1215,14 @@
 (STACKS-AVAIL-N3)
 (SHIPPED-O2)
 (not (STACKS-AVAIL-N2))
-(not (STARTED-O2))
+(not (INITIATED-O2))
 )
 )
 (:action SHIP-ORDER-O2-N1-N2
 :parameters ()
 :precondition
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (MADE-P4)
 (MADE-P3)
 (STACKS-AVAIL-N1)
@@ -1232,14 +1232,14 @@
 (STACKS-AVAIL-N2)
 (SHIPPED-O2)
 (not (STACKS-AVAIL-N1))
-(not (STARTED-O2))
+(not (INITIATED-O2))
 )
 )
 (:action SHIP-ORDER-O2-N0-N1
 :parameters ()
 :precondition
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (MADE-P4)
 (MADE-P3)
 (STACKS-AVAIL-N0)
@@ -1249,14 +1249,14 @@
 (STACKS-AVAIL-N1)
 (SHIPPED-O2)
 (not (STACKS-AVAIL-N0))
-(not (STARTED-O2))
+(not (INITIATED-O2))
 )
 )
 (:action SHIP-ORDER-O1-N4-N5
 :parameters ()
 :precondition
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (MADE-P2)
 (MADE-P1)
 (STACKS-AVAIL-N4)
@@ -1266,14 +1266,14 @@
 (STACKS-AVAIL-N5)
 (SHIPPED-O1)
 (not (STACKS-AVAIL-N4))
-(not (STARTED-O1))
+(not (INITIATED-O1))
 )
 )
 (:action SHIP-ORDER-O1-N3-N4
 :parameters ()
 :precondition
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (MADE-P2)
 (MADE-P1)
 (STACKS-AVAIL-N3)
@@ -1283,14 +1283,14 @@
 (STACKS-AVAIL-N4)
 (SHIPPED-O1)
 (not (STACKS-AVAIL-N3))
-(not (STARTED-O1))
+(not (INITIATED-O1))
 )
 )
 (:action SHIP-ORDER-O1-N2-N3
 :parameters ()
 :precondition
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (MADE-P2)
 (MADE-P1)
 (STACKS-AVAIL-N2)
@@ -1300,14 +1300,14 @@
 (STACKS-AVAIL-N3)
 (SHIPPED-O1)
 (not (STACKS-AVAIL-N2))
-(not (STARTED-O1))
+(not (INITIATED-O1))
 )
 )
 (:action SHIP-ORDER-O1-N1-N2
 :parameters ()
 :precondition
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (MADE-P2)
 (MADE-P1)
 (STACKS-AVAIL-N1)
@@ -1317,14 +1317,14 @@
 (STACKS-AVAIL-N2)
 (SHIPPED-O1)
 (not (STACKS-AVAIL-N1))
-(not (STARTED-O1))
+(not (INITIATED-O1))
 )
 )
 (:action SHIP-ORDER-O1-N0-N1
 :parameters ()
 :precondition
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (MADE-P2)
 (MADE-P1)
 (STACKS-AVAIL-N0)
@@ -1334,7 +1334,7 @@
 (STACKS-AVAIL-N1)
 (SHIPPED-O1)
 (not (STACKS-AVAIL-N0))
-(not (STARTED-O1))
+(not (INITIATED-O1))
 )
 )
 (:action MAKE-PRODUCT-P5-N2
@@ -1342,8 +1342,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N2)
 )
 :effect
@@ -1359,8 +1359,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N1)
 )
 :effect
@@ -1376,8 +1376,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P5)
-(STARTED-O4)
-(STARTED-O3)
+(INITIATED-O4)
+(INITIATED-O3)
 (STACKS-AVAIL-N0)
 )
 :effect
@@ -1393,8 +1393,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N2)
 )
 :effect
@@ -1410,8 +1410,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N1)
 )
 :effect
@@ -1427,8 +1427,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P4)
-(STARTED-O5)
-(STARTED-O2)
+(INITIATED-O5)
+(INITIATED-O2)
 (STACKS-AVAIL-N0)
 )
 :effect
@@ -1444,8 +1444,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N2)
 )
 :effect
@@ -1461,8 +1461,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N1)
 )
 :effect
@@ -1478,8 +1478,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P3)
-(STARTED-O4)
-(STARTED-O2)
+(INITIATED-O4)
+(INITIATED-O2)
 (STACKS-AVAIL-N0)
 )
 :effect
@@ -1495,8 +1495,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N2)
 )
 :effect
@@ -1512,8 +1512,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N1)
 )
 :effect
@@ -1529,8 +1529,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P2)
-(STARTED-O5)
-(STARTED-O1)
+(INITIATED-O5)
+(INITIATED-O1)
 (STACKS-AVAIL-N0)
 )
 :effect
@@ -1546,8 +1546,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N2)
 )
 :effect
@@ -1563,8 +1563,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N1)
 )
 :effect
@@ -1580,8 +1580,8 @@
 :precondition
 (and
 (MACHINE-CONFIGURED-P1)
-(STARTED-O3)
-(STARTED-O1)
+(INITIATED-O3)
+(INITIATED-O1)
 (STACKS-AVAIL-N0)
 )
 :effect
@@ -1613,7 +1613,7 @@
 )
 :effect
 (and
-(STARTED-O5)
+(INITIATED-O5)
 (STACKS-AVAIL-N0)
 (not (WAITING-O5))
 (not (STACKS-AVAIL-N1))
@@ -1628,7 +1628,7 @@
 )
 :effect
 (and
-(STARTED-O4)
+(INITIATED-O4)
 (STACKS-AVAIL-N0)
 (not (WAITING-O4))
 (not (STACKS-AVAIL-N1))
@@ -1643,7 +1643,7 @@
 )
 :effect
 (and
-(STARTED-O3)
+(INITIATED-O3)
 (STACKS-AVAIL-N0)
 (not (WAITING-O3))
 (not (STACKS-AVAIL-N1))
@@ -1658,7 +1658,7 @@
 )
 :effect
 (and
-(STARTED-O2)
+(INITIATED-O2)
 (STACKS-AVAIL-N0)
 (not (WAITING-O2))
 (not (STACKS-AVAIL-N1))
@@ -1673,7 +1673,7 @@
 )
 :effect
 (and
-(STARTED-O1)
+(INITIATED-O1)
 (STACKS-AVAIL-N0)
 (not (WAITING-O1))
 (not (STACKS-AVAIL-N1))

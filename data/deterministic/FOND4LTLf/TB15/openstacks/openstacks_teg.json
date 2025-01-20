@@ -1,12 +1,12 @@
 {
-    "a03": "(stacks_avail_n2 U ((F shipped_o1) & (F shipped_o2) & (F shipped_o3)))",
-    "a04": "(stacks_avail_n3 U ((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & (F shipped_o4)))",
-    "a05": "(stacks_avail_n4 U ((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & (F shipped_o4) & (F shipped_o5)))",
-    "e03": "((F ((F shipped_o1) & (F shipped_o2) & (F shipped_o3))))",
-    "e04": "((F ((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & (F shipped_o4))))",
-    "e05": "((F ((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & (F shipped_o4) & (F shipped_o5))))",
-    "f05": "((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & (F shipped_o4) & (F shipped_o5))",
-    "f03": "((F shipped_o1) & (F shipped_o2) & (F shipped_o3))",
-    "g02": "((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & ((!started_o1) U started_o2))",
-    "g03": "((F shipped_o1) & (F shipped_o2) & (F shipped_o3) & ((!started_o1) U started_o2) & ((!started_o2) U started_o3))"
+    "a03": "(stacksavailn2 U ((F shippedo1) & (F shippedo2) & (F shippedo3)))",
+    "a04": "(stacksavailn3 U ((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4)))",
+    "a05": "(stacksavailn4 U ((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5)))",
+    "e03": "((F ((F (shippedo1)) & (F (shippedo2)) & (F (shippedo3)))))",
+    "e04": "((F ((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4))))",
+    "e05": "((F ((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5))))",
+    "f05": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5))",
+    "f03": "((F shippedo1) & (F shippedo2) & (F shippedo3))",
+    "g02": "((F shippedo1) & (F shippedo2) & (F shippedo3) & ((!startedo1) U startedo2))",
+    "g03": "((F shippedo1) & (F shippedo2) & (F shippedo3) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3))"
 }

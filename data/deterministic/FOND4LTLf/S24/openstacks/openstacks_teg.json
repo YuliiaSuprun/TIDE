@@ -1,0 +1,18 @@
+{
+    "p01": "((madep4 R (!madep5)) & (madep3 R (!madep4)) & (madep2 R (!madep3)) & (madep1 R (!madep2)) & (F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5))",
+    "s01": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3))",
+    "s02": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4))",
+    "s03": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2))",
+    "s04": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3))",
+    "s05": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4))",
+    "s06": "((F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5))",
+    "r01": "((madep4 R (!madep5)) & (F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5))",
+    "r02": "((madep4 R (!madep5)) & (madep3 R (!madep4)) & (F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5))",
+    "r03": "((madep4 R (!madep5)) & (madep3 R (!madep4)) & (madep2 R (!madep3)) & (F shippedo1) & (F shippedo2) & (F shippedo3) & (F shippedo4) & (F shippedo5) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5))",
+    "n01": "(F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5))))))))))))))",
+    "n02": "((F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5)))))))))))))) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5))",
+    "n03": "((F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5)))))))))))))) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5) & (madep4 R (!madep5)))",
+    "n04": "((F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5)))))))))))))) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5) & (madep4 R (!madep5)) & (madep3 R (!madep4)))",
+    "n05": "((F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5)))))))))))))) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5) & (madep4 R (!madep5)) & (madep3 R (!madep4)) & (madep2 R (!madep3)))",
+    "n06": "((F (shippedo1 & (X (F (shippedo2 & (X (F (shippedo3 & (X (F (shippedo4 & (X (F (shippedo5)))))))))))))) & ((!startedo1) U startedo2) & ((!startedo2) U startedo3) & ((!startedo3) U startedo4) & ((!startedo5) U startedo5) & (madep4 R (!madep5)) & (madep3 R (!madep4)) & (madep2 R (!madep3)) & (madep1 R (!madep2)))"
+}
