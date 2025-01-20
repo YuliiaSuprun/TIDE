@@ -2,11 +2,11 @@ CXX = g++
 
 CXXFLAGS = -std=c++17 -Wall -Wextra -O3 -march=native -flto -DNDEBUG \
            -Iinclude/domain -Iinclude/ltl \
-		   -I$(HOME)/anaconda3/envs/spotenv/include \
+		   -I/opt/miniconda/envs/spotenv/include \
            -I/usr/include -Ipddlboat/include
 
 # Linker flags (directories to search for libraries)
-LDFLAGS = -L$(HOME)/anaconda3/envs/spotenv/lib \
+LDFLAGS = -L/opt/miniconda/envs/spotenv/lib \
           -L/usr/lib/x86_64-linux-gnu \
           -Lpddlboat/build/release \
 		  -L/usr/local/lib -flto
