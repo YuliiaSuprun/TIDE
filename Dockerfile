@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y \
     bison autoconf \
     python3 \
     python3-pip \
-    && apt-get clean
+    mona \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Miniconda (lightweight Anaconda version)
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
@@ -27,6 +29,12 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 
 # Add Miniconda to PATH
 ENV PATH="/opt/miniconda/bin:$PATH"
+
+# Set LD_LIBRARY_PATH for runtime
+ENV LD_LIBRARY_PATH=/app/lib:/app/pddlboat/build/release:/opt/miniconda/envs/spotenv/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+# Set environment variable for Fast Downward path
+ENV FAST_DOWNWARD_BASE_PATH=/app/pddlboat/submodules/downward
 
 # Create a new Conda environment and install Spot
 RUN /opt/miniconda/bin/conda create --name spotenv python=3.8 -y && \
@@ -37,20 +45,25 @@ RUN pip3 install plan4past
 
 # Download and install Boost 1.82.0 from source
 WORKDIR /tmp
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz && \
+RUN wget https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.gz && \
     tar -xvzf boost_1_82_0.tar.gz && \
     cd boost_1_82_0 && \
     ./bootstrap.sh && \
-    ./b2 install --prefix=/usr/local
-    
+    ./b2 install --prefix=/usr/local && \
+    rm -rf /tmp/boost_1_82_0 /tmp/boost_1_82_0.tar.gz
+
 # Set the working directory
 WORKDIR /app
 
 # Copy the entire project into the container
 COPY . /app
 
-# Set LD_LIBRARY_PATH for the libraries
-ENV LD_LIBRARY_PATH=/usr/local/lib:/app/lib:/opt/miniconda/envs/spotenv/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+# Install FOND4LTLf and dependencies
+RUN /opt/miniconda/bin/conda run -n spotenv conda install pip -y && \
+    /opt/miniconda/bin/conda run -n spotenv pip install --upgrade pip setuptools wheel && \
+    /opt/miniconda/bin/conda run -n spotenv pip install ltlf2dfa click ply && \
+    cd /app/FOND4LTLf && \
+    /opt/miniconda/bin/conda run -n spotenv pip install .
 
 # Build the project using the Makefile
 RUN /opt/miniconda/bin/conda run -n spotenv make
