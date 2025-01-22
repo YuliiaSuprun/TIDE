@@ -4,3 +4,6 @@
 [submodule "pddlboat/submodules/symk"]
 	path = pddlboat/submodules/symk
 	url = git@github.com:wbthomason/symk.git
+[submodule "FOND4LTLf"]
+	path = FOND4LTLf
+	url = https://github.com/whitemech/FOND4LTLf.git
