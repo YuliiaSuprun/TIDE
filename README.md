@@ -53,8 +53,8 @@ scripts/run_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
   - `3`: Specifies the number of runs for TIDE.
 - **Options**:
   - `-f`: Uses feedback from failed attempts.
-  - `-h`: Enables heuristics.
-  - `-c`: Enables caching.
+  - `-h`: Enables heuristics for selecting a promising DFA trace.
+  - `-c`: Enables caching of successful prefixes.
 - **Planner Options**:
   - `--planner`: The planner to use (`fd` or `astar`).
   - `--search`: Specifies the search type when using `fd` (options: `lama-first`, `lama-full`).
@@ -89,5 +89,4 @@ scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --
 
 ---
 
-By using Docker, you can easily experiment with TIDE in a consistent and reproducible environment.
 
