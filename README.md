@@ -1,110 +1,93 @@
 # TIDE: A Trace-Informed Depth-First Exploration
 
-This repository contains the implementation of **TIDE (Trace-Informed Depth-First Exploration)**, a novel planner designed to solve tasks in general planning domains defined in PDDL format with LTL$_f$ (Linear Temporal Logic on finite traces) goals. TIDE decomposes the temporal planning problem into a sequence of classical planning subproblems and leverages off-the-shelf planners for efficient execution. 
-## Installation
-1. Ensure you have a C++17-compatible compiler installed.
-2. Installing Required Libraries:
-   * **Spot Library**: Install the Spot library using the following command:
-     ```
-     conda create --name spotenv python=3.8 # adjust as desired
-     conda activate spotenv
-     conda install -c conda-forge spot
-     ```
-     For detailed installation instructions, [click here](https://spot.lre.epita.fr/install.html).
-   * **Graphviz**: This is required for automaton visualization. You can run the following (if you use conda environment).
-     ```
-     conda install -c conda-forge graphviz
-     ```
-     You can also use other method to install it based on your OS: [click here for details](https://graphviz.org/download/).
-   * **SFML Library**: Install the SFML library, which is used for grid-world visualization. You can typically install it using your system's package manager.
-     For MacOS, you can use Homebrew:
-     ```
-     brew install sfml
-     ```
-3. Configuring the Makefile\
-   For the provided Makefile to work properly, you should adjust some paths to match the locations of libraries on your system. Here are the lines you should check and potentially modify:
+This repository contains the implementation of **TIDE (Trace-Informed Depth-First Exploration)**, a novel planner designed to solve tasks in general planning domains defined in PDDL format with LTL$_f$ (Linear Temporal Logic on finite traces) goals. TIDE decomposes the temporal planning problem into a sequence of classical planning subproblems and leverages off-the-shelf planners for efficient execution.
+
+---
+
+## Using TIDE with Docker
+
+This guide explains how to build and use the TIDE project as a Docker container. Docker provides an isolated and consistent environment for running TIDE without worrying about installing dependencies manually.
+
+### **Building the Docker Image**
+To create the Docker image:
+
+1. Navigate to the root of this repository:
+   ```bash
+   cd /path/to/TIDE
    ```
-   CXXFLAGS = ... -I$(HOME)/miniconda3/envs/spotenv/include -I/usr/local/include
-   LDFLAGS = ... -L$(HOME)/miniconda3/envs/spotenv/lib ... -L/usr/local/lib
+2. Build the Docker image:
+   ```bash
+   docker build -t tide_image .
    ```
-   * **Spot Library**:\
-      If you installed Spot using a method other than conda, or if you installed it in a different conda environment than spotenv, you'll need to adjust the include (-I) and library (-L) paths in CXXFLAGS and LDFLAGS respectively:
-     * Modify the path in **-I$(HOME)/miniconda3/envs/spotenv/include** to point to where Spot's header files are located on your system.
-     * Similarly, adjust **-L$(HOME)/miniconda3/envs/spotenv/lib** to point to where Spot's library files are.
-   * **SFML Library**:\
-     The Makefile assumes SFML is installed in /usr/local/lib. If you installed it elsewhere, modify **-L/usr/local/lib** in LDFLAGS to point to the correct location.
+   - Replace `tide_image` with a name of your choice for the image.
 
-Once you've made these adjustments, you should be able to run ```make``` to compile the project.
+---
 
-4. Adjusting the **run.sh** File\
-Before executing your program with run.sh, ensure the script knows where to find the dynamic libraries used by the program.\
-Here's what you need to adjust:
+### **Running the Docker Container**
+To start a container from the image:
 
-In the run.sh file, there's a line:
-```
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$HOME/miniconda3/envs/spotenv/lib
-```
-This sets the dynamic linker to search for dynamic libraries in the specified path. Adjust the path $HOME/miniconda3/envs/spotenv/lib if you installed Spot in a different location or using a different conda environment than **spotenv**.\
-After making this adjustment, grant execute permissions to the run.sh script using:
-```
-chmod +x run.sh
+1. Run the following command to open an interactive shell:
+   ```bash
+   docker run -it tide_image /bin/bash
+   ```
+
+2. Once inside the container, you can execute the provided scripts as described below.
+
+---
+
+### **Running TIDE on a Single Problem**
+
+To run TIDE on a specific PDDL problem:
+
+```bash
+scripts/run_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
+                      data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
+                      3 -f -h -c --planner fd --search lama-first
 ```
 
-## Usage
-1. Clean and compile:
+#### Explanation of Arguments:
+- **Domain and Problem Files**:
+  - `data/deterministic/LTLf/TB15/blocksworld/domain.pddl`: Path to the domain file.
+  - `data/deterministic/LTLf/TB15/blocksworld/a03.pddl`: Path to the problem file.
+- **Number of Runs**:
+  - `3`: Specifies the number of runs for TIDE.
+- **Options**:
+  - `-f`: Uses feedback from failed attempts.
+  - `-h`: Enables heuristics.
+  - `-c`: Enables caching.
+- **Planner Options**:
+  - `--planner`: The planner to use (`fd` or `astar`).
+  - `--search`: Specifies the search type when using `fd` (options: `lama-first`, `lama-full`).
+- **Optional Flags**:
+  - `--save_dfa`: Saves the DFA as an image.
+
+---
+
+### **Running TIDE on All Problems in a Directory**
+
+To run TIDE on all PDDL problems in a directory:
+
+```bash
+scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --planner astar
 ```
-make clean
-make
-```
-2. **Running TIDE method** (my method)
-* on a specific PDDL problem
-```
-./scripts/run_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl data/deterministic/LTLf/TB15/blocksworld/a03.pddl 3 -f -h --save_dfa --planner fd --search lama-full
-```
-* on all PDDL problems in the directory
-```
-./scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h --save_dfa --planner astar
-```
-2. **Running other methods** (p4p, exp, poly)
-* on a specific PDDL problem
-```
-./scripts/run_others_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl data/deterministic/LTLf/TB15/blocksworld/a03.pddl 3 --method exp --search lama-first
-```
-```
-./scripts/run_others_single.sh data/deterministic/PPLTL/TB15/blocksworld/domain.pddl data/deterministic/PPLTL/TB15/blocksworld/a03.pddl 3 --method plan4past --search lama-first --goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
-```
-* on all PDDL problems in the directory
-```
-./scripts/run_others_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 --method exp --search lama-first
-```
-```
-./run_others_all_in_dir.sh /home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/Plan4Past-data/deterministic/LTLf/TB15/blocksworld 1 --method exp
-```
-```
-./scripts/run_others_all_in_dir.sh data/deterministic/PPLTL/TB15/blocksworld 3 --method plan4past --search lama-first --goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
-```
-## Installation of FOND4LTLf
-1. Activate Your Conda Environment
-```
-conda activate spotenv
-```
-2. Install Dependencies
-```
-conda install pip
-pip install --upgrade pip setuptools wheel
-pip install ltlf2dfa click ply
-```
-3. Install FOND4LTLf in the Conda Environment
-```
-cd FOND4LTLf
-pip install .
-```
-4. Test the Installation
-```
-python3 -m pip show fond4ltlf
-fond4ltlf --help
-```
-5. Install Mona fro LTLf-to-DFA conversion.
-```
-sudo apt install mona
-```
+
+#### Explanation of Arguments:
+- **Directory Path**:
+  - `data/deterministic/LTLf/TB15/blocksworld`: Path to the directory containing `domain.pddl` and problem files.
+- **Other Arguments**:
+  - These are the same as described for running TIDE on a single problem.
+
+---
+
+### **Key Notes**
+- Ensure that all required PDDL files are available in the specified paths.
+- The Docker container provides all necessary dependencies, so you don’t need to install anything manually.
+- To exit the Docker container, type:
+  ```bash
+  exit
+  ```
+
+---
+
+By using Docker, you can easily experiment with TIDE in a consistent and reproducible environment.
+
