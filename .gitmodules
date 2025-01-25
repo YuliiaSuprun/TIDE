@@ -1,3 +1,9 @@
+[submodule "pddlboat/submodules/downward"]
+	path = pddlboat/submodules/downward
+	url = https://github.com/aibasel/downward.git
+[submodule "pddlboat/submodules/symk"]
+	path = pddlboat/submodules/symk
+	url = https://github.com/wbthomason/symk.git
 [submodule "FOND4LTLf"]
 	path = FOND4LTLf
 	url = https://github.com/whitemech/FOND4LTLf.git
