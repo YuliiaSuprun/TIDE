@@ -65,13 +65,10 @@ WORKDIR /app/pddlboat/submodules/downward
 RUN apt-get update && apt-get install -y cmake g++ make python3 && apt-get clean && rm -rf /var/lib/apt/lists/* && \
     python3 build.py && \
     ./fast-downward.py --help
-    
+
 # Build pddlboat
 WORKDIR /app/pddlboat
 RUN mkdir -p build/release && cd build/release && cmake ../.. && make
-# Debug: Check if libpddlboat-cpp.so exists
-WORKDIR /app/pddlboat/build/release
-RUN ls -l | grep libpddlboat-cpp.so
 
 # Add Fast Downward to PATH
 ENV PATH="/app/pddlboat/submodules/downward:$PATH"
