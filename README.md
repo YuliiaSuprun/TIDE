@@ -1,6 +1,6 @@
 # TIDE: A Trace-Informed Depth-First Exploration
 
-This repository contains the implementation of **TIDE (Trace-Informed Depth-First Exploration)**, a novel planner designed to solve tasks in general planning domains defined in PDDL format with LTL$_f$ (Linear Temporal Logic on finite traces) goals. TIDE decomposes the temporal planning problem into a sequence of classical planning subproblems and leverages off-the-shelf planners for efficient execution.
+This repository contains the implementation of **TIDE (Trace-Informed Depth-First Exploration)**, a novel planner designed to solve tasks in general planning domains defined in PDDL format with LTLf (Linear Temporal Logic on finite traces) goals. TIDE decomposes the temporal planning problem into a sequence of classical planning subproblems and leverages off-the-shelf planners for efficient execution.
 
 ---
 
@@ -87,9 +87,9 @@ scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --
 
 TIDE is compared against several established frameworks:
 
-- **FOND4LTL$_f$**: Converts LTL$_f$ formulas into deterministic finite automata (DFA) and computes the product graph of the DFA and the domain. Originally designed for FOND domains but applicable to deterministic domains.
-- **Exp**: Translates LTL$_f$ goals into nondeterministic finite automata (NFA).
-- **Poly**: Uses polynomial-time techniques to convert LTL$_f$ formulas into alternating finite automata (AFA).
+- **FOND4LTLf**: Converts LTLf formulas into deterministic finite automata (DFA) and computes the product graph of the DFA and the domain. Originally designed for FOND domains but applicable to deterministic domains.
+- **Exp**: Translates LTLf goals into nondeterministic finite automata (NFA).
+- **Poly**: Uses polynomial-time techniques to convert LTLf formulas into alternating finite automata (AFA).
 - **Plan4Past**: Handles temporal goals expressed in Pure-Past Linear Temporal Logic (PPLTL).
 
 These methods use **two classical off-the-shelf planners**:
