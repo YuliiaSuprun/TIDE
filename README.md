@@ -81,7 +81,34 @@ scripts/run_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
 - **Optional Flags:**
   - `--save_dfa`: Saves the DFA as an image.
 
+#### **Solution Output Location**
+All generated solution plans are stored in the `/app/solutions` directory within the Docker container. 
+- After running the above command, the resulting 3 plans will be outputted in:
+  ```
+  /app/solutions/tide/fd/lama-first/blocksworld/a03
+  ```
+- Performance metrics for solving this problem are saved in:
+  ```
+  /app/solutions/tide/fd/lama-first/blocksworld/a03/stats.txt
+  ```
+- To view the first generated plan:
+  ```bash
+  cat /app/solutions/tide/fd/lama-first/blocksworld/a03/a03_plan_1
+  ```
+- To see stats for a particular problem:
+  ```bash
+  cat /app/solutions/tide/fd/lama-first/blocksworld/a03/stats.txt
+  ```
+- To see overall stats for all problems solved by this method and planner:
+  ```bash
+  cat /app/solutions/tide/fd/lama-first/blocksworld/overall_stats.txt
+  ```
+or (if a caching option `-c` was provided)
+  ```bash
+  cat /app/solutions/tide/fd/lama-first/blocksworld/overall_stats_cached.txt
+  ```
 ---
+
 
 ### **Running TIDE on All Problems in a Directory**
 
@@ -97,6 +124,8 @@ scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --
 - **Other Arguments:**
   - These are the same as described for running TIDE on a single problem.
 
+#### **Solution Output Location**
+All generated plans and statistics will be stored under `/app/solutions/tide/astar/blocksworld/`.
 ---
 
 ## Running Competitor Methods
@@ -176,7 +205,12 @@ scripts/run_others_all_in_dir.sh data/deterministic/PPLTL/TB15/blocksworld 3 --m
   - These are the same as described for running a single problem.
 
 ---
+### **Solution Output for Competitor Methods**
+For all competitor methods, solution plans and performance metrics are saved inside the container in:
+- `/app/solutions/<method>/astar/<domain>/` when using the `astar` planner.
+- `/app/solutions/<method>/fd/<search>/<domain>/` when using the `fd` planner.
 
+---
 ## Key Notes
 - Ensure that all required PDDL files and goal JSON files are available in the specified paths.
 - The Docker container provides all necessary dependencies, so you don’t need to install anything manually.
