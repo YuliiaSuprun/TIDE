@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     mona \
+    swi-prolog \
     libncurses5 \
     libncurses6 \
     libtinfo6 \
