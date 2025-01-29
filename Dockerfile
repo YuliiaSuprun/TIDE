@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     mona \
     libncurses5 \
     libncurses6 \
+    libtinfo6 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,9 +29,6 @@ RUN apt-get update && apt-get install -y \
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
     rm Miniconda3-latest-Linux-x86_64.sh
-
-# Add Miniconda to PATH
-ENV PATH="/opt/miniconda/bin:$PATH"
 
 # Set LD_LIBRARY_PATH for runtime
 ENV LD_LIBRARY_PATH=/app/lib:/app/pddlboat/build/release:/opt/miniconda/envs/spotenv/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
@@ -70,8 +68,8 @@ RUN apt-get update && apt-get install -y cmake g++ make python3 && apt-get clean
 WORKDIR /app/pddlboat
 RUN mkdir -p build/release && cd build/release && cmake ../.. && make
 
-# Add Fast Downward to PATH
-ENV PATH="/app/pddlboat/submodules/downward:$PATH"
+# Add Miniconda and FastDownward to PATH
+ENV PATH="/opt/miniconda/bin:/opt/miniconda/envs/spotenv/bin:/app/pddlboat/submodules/downward:$PATH"
 
 WORKDIR /app
 
