@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BINPATH=$(pwd) #/u/jabaier/research/landmarks_in_pddl/bin
+BINPATH=$(pwd) # competitors/pddlTEG2pddl
 PDDL2EFFAX=$BINPATH/pddl2effax.sh
 PL=swipl
 TOPDDL=$BINPATH/topddl.pl
@@ -21,6 +21,8 @@ MODE=$5
 OUTPUT_PDDL_DOMAIN=$3
 OUTPUT_PDDL_PROBLEM=$4
 
+# Ensure the tmp directory exists
+mkdir -p $BINPATH/tmp
 
 OUTPUT_PROLOG_DOMAIN=`mktemp $BINPATH/tmp/input-domain.XXXXXXX.pl`
 OUTPUT_PROLOG_PROBLEM=`mktemp $BINPATH/tmp/input-problem.XXXXXXX.pl`
