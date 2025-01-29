@@ -44,19 +44,6 @@ void printStats(std::ostream& os, int numRuns, double averageTranslateTime, doub
     }
 }
 
-// Helper function to remove all files in a directory
-void cleanUpTempFiles(const std::string& tempDir) {
-    for (const auto& entry : filesystem::directory_iterator(tempDir)) {
-        if (entry.is_regular_file()) {
-            try {
-                filesystem::remove(entry.path());
-            } catch (const std::exception& e) {
-                cerr << "Failed to remove file " << entry.path() << ": " << e.what() << endl;
-            }
-        }
-    }
-}
-
 // Helper function to remove all files starting with a specific prefix in a given directory
 void removeFilesWithPrefix(const std::string& directory, const std::string& prefix) {
     try {
@@ -398,17 +385,16 @@ int main(int argc, char** argv) {
     generalStatsFile.close();
 
     // After running experiments, clean up all temporary files
-    if (method == "poly" || method == "exp") {
-        std::string tempDirPoly = "competitors/pddlTEG2pddl/tmp";
-        std::string tempDirExp = "competitors/prologex/tmp";
-
-        try {
-            cleanUpTempFiles(tempDirPoly);
-            cleanUpTempFiles(tempDirExp);
-        } catch (const std::exception& e) {
-            cerr << "Error cleaning up temporary files: " << e.what() << endl;
+    try {
+        if (method == "exp") {
+            filesystem::remove_all("competitors/pddlTEG2pddl/tmp");
+        } else if (method == "poly") {
+            filesystem::remove_all("competitors/prologex/tmp");
         }
+    } catch (const std::exception& e) {
+        std::cerr << "Error cleaning up temporary files: " << e.what() << std::endl;
     }
+
 
     return 0;
 }
