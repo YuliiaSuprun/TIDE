@@ -78,6 +78,10 @@ int main(int argc, char** argv) {
     }
 
     string directoryPath = argv[1];
+    // Ensure directoryPath is absolute
+    filesystem::path directoryPathObj(directoryPath);
+    directoryPath = filesystem::absolute(directoryPathObj).string();
+    
     int numRuns = stoi(argv[2]);
     string domainFilePath = directoryPath + "/domain.pddl";
     string domain_name = PDDLProblem::extract_domain_name(domainFilePath);

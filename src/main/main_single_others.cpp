@@ -78,6 +78,13 @@ int main(int argc, char** argv) {
 
     string domainFilePath = argv[1];
     string problemFilePath = argv[2];
+
+    // Ensure domainFilePath and problemFilePath are absolute
+    filesystem::path domainPathObj(domainFilePath);
+    filesystem::path problemPathObj(problemFilePath);
+    domainFilePath = filesystem::absolute(domainPathObj).string();
+    problemFilePath = filesystem::absolute(problemPathObj).string();
+    
     // Extract a problem name.
     string problem_name = PDDLProblem::extract_problem_name(problemFilePath);
     string domain_name = PDDLProblem::extract_domain_name(problemFilePath);
