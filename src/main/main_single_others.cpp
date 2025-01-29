@@ -78,6 +78,14 @@ int main(int argc, char** argv) {
 
     string domainFilePath = argv[1];
     string problemFilePath = argv[2];
+
+    // Ensure domainFilePath and problemFilePath are absolute
+    filesystem::path domainPathObj(domainFilePath);
+    filesystem::path problemPathObj(problemFilePath);
+
+    domainFilePath = filesystem::absolute(domainPathObj).string();
+    problemFilePath = filesystem::absolute(problemPathObj).string();
+
     // Extract a problem name.
     string problem_name = PDDLProblem::extract_problem_name(problemFilePath);
     string domain_name = PDDLProblem::extract_domain_name(problemFilePath);
@@ -231,8 +239,12 @@ int main(int argc, char** argv) {
     }
     cout << "translateCmd: " << translateCmd << endl;
 
+    // Get the base path from the environment variable, or use the default local path (modify it)
+    const char* basePath = std::getenv("FAST_DOWNWARD_BASE_PATH");
+    std::string basePathStr = basePath ? basePath : "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward";
+
     // Construct the Fast Downward command
-    string fastDownwardCmd = "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
+    std::string fastDownwardCmd = basePathStr + "/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
     if (timeout != 0) {
         fastDownwardCmd = "timeout " + to_string(timeout) + " " + fastDownwardCmd;
     }
