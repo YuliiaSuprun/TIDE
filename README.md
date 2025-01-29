@@ -4,6 +4,22 @@ This repository contains the implementation of **TIDE (Trace-Informed Depth-Firs
 
 ---
 
+## Cloning the Repository
+
+To ensure that all required submodules are pulled correctly, **always clone the repository using the following command:**
+
+```bash
+git clone --recurse-submodules https://github.com/YuliiaSuprun/TIDE.git
+```
+
+If you have already cloned the repository without submodules, initialize them manually by running:
+
+```bash
+git submodule update --init --recursive
+```
+
+---
+
 ## Using TIDE with Docker
 
 This guide explains how to build and use the TIDE project as a Docker container. Docker provides an isolated and consistent environment for running TIDE without worrying about installing dependencies manually.
