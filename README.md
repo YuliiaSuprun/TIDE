@@ -125,7 +125,9 @@ scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --
   - These are the same as described for running TIDE on a single problem.
 
 #### **Solution Output Location**
-All generated plans and statistics will be stored under `/app/solutions/tide/astar/blocksworld/`.
+
+All generated plans and statistics will be stored under ``/app/solutions/tide/astar/blocksworld/``.
+
 ---
 
 ## Running Competitor Methods
