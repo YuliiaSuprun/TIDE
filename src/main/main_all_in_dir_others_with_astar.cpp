@@ -119,20 +119,21 @@ int countRealActions(const std::string &filePath) {
     }
 
     std::string line;
-    bool startProcessing = false;
-    int realActionCount = 0;
+    // bool startProcessing = false;
+    int realActionCount = -1;
 
     // Regex to match lines starting with "(o_"
     std::regex syncActionRegex("^\\(o_.*\\)");
+    std::regex transActionsRegex("^\\(trans-.*\\)");
 
     while (std::getline(inputFile, line)) {
         // Skip lines until we encounter "(o_copy)"
-        if (!startProcessing) {
-            if (line.find("(o_copy)") != std::string::npos) {
-                startProcessing = true;
-            }
-            continue;
-        }
+        // if (!startProcessing) {
+        //     if (line.find("(o_copy)") != std::string::npos) {
+        //         startProcessing = true;
+        //     }
+        //     continue;
+        // }
 
         // Skip empty lines
         if (line.empty()) {
@@ -140,7 +141,7 @@ int countRealActions(const std::string &filePath) {
         }
 
         // Check if the line doesn't start with "(o_" (i.e., is a real action)
-        if (!std::regex_match(line, syncActionRegex)) {
+        if (!(std::regex_match(line, syncActionRegex) || std::regex_match(line, transActionsRegex))) {
             ++realActionCount;
         }
     }
@@ -421,6 +422,11 @@ int main(int argc, char** argv) {
             // Weird map file. Skip it.
             continue;
         }
+
+        // if (problemFilePath.find("a03") == string::npos) {
+        //     // Weird map file. Skip it.
+        //     continue;
+        // }
 
 
         cout << "Solving " << problemFilePath << "..." << endl;

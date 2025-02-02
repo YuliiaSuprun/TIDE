@@ -32,7 +32,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
     rm Miniconda3-latest-Linux-x86_64.sh
 
 # Set LD_LIBRARY_PATH for runtime
-ENV LD_LIBRARY_PATH=/app/lib:/app/pddlboat/build/release:/opt/miniconda/envs/spotenv/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH="/app/lib:/app/pddlboat/build/release:/opt/miniconda/envs/spotenv/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
 
 # Set environment variable for Fast Downward path
 ENV FAST_DOWNWARD_BASE_PATH=/app/pddlboat/submodules/downward
