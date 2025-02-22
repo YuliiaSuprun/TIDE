@@ -32,7 +32,7 @@ SRC_COMMON = src/ltl/TEGProblem.cpp src/ltl/DFANode.cpp \
 SRC_MAIN_SINGLE = src/main/main_single.cpp $(SRC_COMMON)
 SRC_MAIN_SINGLE_OTHERS = src/main/main_single_others.cpp $(SRC_COMMON)
 SRC_MAIN_ALL_IN_DIR = src/main/main_all.cpp $(SRC_COMMON)
-SRC_MAIN_ALL_IN_DIR_OTHERS = src/main/main_all_in_dir_others.cpp $(SRC_COMMON)
+SRC_MAIN_ALL_IN_DIR_OTHERS = src/main/main_all_in_dir_others_with_astar.cpp $(SRC_COMMON)
 
 # Automatically generate object file names in the lib directory
 OBJ_MAIN_SINGLE = $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRC_MAIN_SINGLE))
@@ -55,7 +55,7 @@ HEADERS = include/ltl/LTLFormula.h include/domain/GridState.h \
 
 # Executable targets
 TARGET = $(BINDIR)/main_single $(BINDIR)/main_single_others \
-         $(BINDIR)/main_all $(BINDIR)/main_all_in_dir_others
+         $(BINDIR)/main_all $(BINDIR)/main_all_in_dir_others_with_astar
 
 # Default rule: build all targets
 all: $(BINDIR) $(TARGET)
@@ -74,7 +74,7 @@ $(BINDIR)/main_single_others: $(OBJ_MAIN_SINGLE_OTHERS)
 $(BINDIR)/main_all: $(OBJ_MAIN_ALL_IN_DIR)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-$(BINDIR)/main_all_in_dir_others: $(OBJ_MAIN_ALL_IN_DIR_OTHERS)
+$(BINDIR)/main_all_in_dir_others_with_astar: $(OBJ_MAIN_ALL_IN_DIR_OTHERS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 

@@ -278,19 +278,6 @@ void printStats(std::ostream& os, int numRuns, double averageTranslateTime, doub
     }
 }
 
-// Helper function to remove all files in a directory
-void cleanUpTempFiles(const std::string& tempDir) {
-    for (const auto& entry : filesystem::directory_iterator(tempDir)) {
-        if (entry.is_regular_file()) {
-            try {
-                filesystem::remove(entry.path());
-            } catch (const std::exception& e) {
-                cerr << "Failed to remove file " << entry.path() << ": " << e.what() << endl;
-            }
-        }
-    }
-}
-
 // Helper function to remove all files starting with a specific prefix in a given directory
 void removeFilesWithPrefix(const std::string& directory, const std::string& prefix) {
     try {
@@ -307,13 +294,18 @@ void removeFilesWithPrefix(const std::string& directory, const std::string& pref
 
 int main(int argc, char** argv) {
     if (argc < 3) {
-        cerr << "Usage: " << argv[0] << " <Directory Path> <Number of Runs> [--method <'exp', 'poly', 'plan4past'>] [--planner <planner_type>] [--search <'lama-full', 'lama-first'>] [--goal <Goal JSON File>] [--timeout <in ms>]" << endl;
+        cerr << "Usage: " << argv[0] << " <Directory Path> <Number of Runs> [--method <'exp', 'poly', 'plan4past', 'fond4ltlf'>] [--planner <'astar', 'fd'>] [--search <'lama-full', 'lama-first'>] [--goal <Goal JSON File>] [--timeout <in ms>]" << endl;
         exit(EXIT_FAILURE);
     }
 
     string directoryPath = argv[1];
+
+    // Ensure directoryPath is absolute
+    filesystem::path directoryPathObj(directoryPath);
+    directoryPath = filesystem::absolute(directoryPathObj).string();
+
     int numRuns = stoi(argv[2]);
-    string domainFilePath = directoryPath + "/domain_p01.pddl";
+    string domainFilePath = directoryPath + "/domain.pddl";
     string domain_name = PDDLProblem::extract_domain_name(domainFilePath);
     
     string method;
@@ -345,7 +337,7 @@ int main(int argc, char** argv) {
     }
 
     if (method.empty()) {
-        cerr << "ERROR: No method provided. Use --method <method_name>. Options: exp, poly, plan4past" << endl;
+        cerr << "ERROR: No method provided. Use --method <method_name>. Options: exp, poly, plan4past, fond4ltlf" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -374,8 +366,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (method == "plan4past" && goalJsonFilePath.empty()) {
-        cerr << "ERROR: No goal JSON file provided for the plan4past method. Use --goal <Goal JSON File>" << endl;
+    if ((method == "plan4past" || method == "fond4ltlf") && goalJsonFilePath.empty()) {
+        cerr << "ERROR: No goal JSON file provided for the " << method << " method. Use --goal <Goal JSON File>" << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -436,7 +428,7 @@ int main(int argc, char** argv) {
         // Extract a problem name.
         string problem_name = PDDLProblem::extract_problem_name(problemFilePath);
 
-        if (method == "plan4past") {
+        if (method == "plan4past" || method == "fond4ltlf") {
             // Load the goal expression from the JSON file
             try {
                 ifstream jsonFile(goalJsonFilePath);
@@ -469,7 +461,7 @@ int main(int argc, char** argv) {
         double totalSearchTime = 0;
         size_t totalPlanLength = 0;  // Includes all actions
         size_t syncActionsCount = 0; // Count of synchronization actions
-        size_t concisePlanLength = 0; // For Poly
+        size_t concisePlanLength = 0; // For poly and fond4ltlf
 
         // Create the problem subdirectory if it doesn't exist
         string dir_name = common_dir_name + "/" + problem_name;
@@ -491,6 +483,8 @@ int main(int argc, char** argv) {
         if (method == "plan4past") {
             // Construct `plan4past` command
             translateCmd = "plan4past -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\"" + mapFileArgString + " -od " + outputDomainPath + " -op " + outputProblemPath + " > /dev/null 2>&1";
+        } else if (method == "fond4ltlf") {
+            translateCmd = "fond4ltlf -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\" -outd " + outputDomainPath + " -outp " + outputProblemPath + " > /dev/null 2>&1";
         } else if (method == "exp") {
             // Run a script from ltl_compilations/pddlTEG2pddl directory
             translateCmd = "cd competitors/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
@@ -501,15 +495,19 @@ int main(int argc, char** argv) {
             cerr << "ERROR: Unknown method: " << method << endl;
             exit(EXIT_FAILURE);
         }
-        // cout << "translateCmd: " << translateCmd << endl;
+        cout << "translateCmd: " << translateCmd << endl;
+
+        // Get the base path from the environment variable, or use the default local path (modify it)
+        const char* basePath = std::getenv("FAST_DOWNWARD_BASE_PATH");
+        std::string basePathStr = basePath ? basePath : "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward";
 
         // Construct the Fast Downward command
-        string fastDownwardCmd = "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
+        std::string fastDownwardCmd = basePathStr + "/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
 
         if (timeout != 0) {
             fastDownwardCmd = "timeout " + to_string(timeout) + " " + fastDownwardCmd;
         }
-        // cout << "fastDownwardCmd: " << fastDownwardCmd << endl;
+        cout << "fastDownwardCmd: " << fastDownwardCmd << endl;
 
         for (int run = 0; run < numRuns; ++run) {
             cout << "Run #" << run + 1 << " for " << problemFilePath << endl;
@@ -547,9 +545,18 @@ int main(int argc, char** argv) {
                         string line;
                         // Regex to match the line with the cost information
                         regex costRegex("; cost = ([0-9]+)");
-                        // Regex to identify synchronization actions 
-                        // (lines starting with "(o_"
-                        regex syncActionRegex("^\\(o_.*\\)");
+                        // Select the appropriate sync action regex based on the method
+                        regex syncActionRegex;
+                        if (method == "poly") {
+                            // poly sync actions start with "(o_"
+                            syncActionRegex = regex("^\\(o_.*\\)"); 
+                        } else if (method == "fond4ltlf") {
+                            // fond4ltlf sync actions start with "(trans-"
+                            syncActionRegex = regex("^\\(trans-.*\\)"); 
+                        } else {
+                            // Matches nothing, effectively skips the check
+                            syncActionRegex = regex("$a");
+                        }
                         // Process each line from the plan file
                         while (getline(sasPlanFile, line)) {
                             // Copy the contents from a sas plan file to planFilePath
@@ -573,7 +580,7 @@ int main(int argc, char** argv) {
                     }
                     sasPlanFile.close();
 
-                    if (method == "poly") {
+                    if (method == "poly" || method == "fond4ltlf") {
                         // Calculate the normal plan length by excluding sync actions
                         concisePlanLength = totalPlanLength - syncActionsCount;
                     }
@@ -689,16 +696,14 @@ int main(int argc, char** argv) {
     generalStatsFile.close();
 
     // After running experiments, clean up all temporary files
-    if (method == "poly" || method == "exp") {
-        std::string tempDirPoly = "competitors/pddlTEG2pddl/tmp";
-        std::string tempDirExp = "competitors/prologex/tmp";
-
-        try {
-            cleanUpTempFiles(tempDirPoly);
-            cleanUpTempFiles(tempDirExp);
-        } catch (const std::exception& e) {
-            cerr << "Error cleaning up temporary files: " << e.what() << endl;
+    try {
+        if (method == "exp") {
+            filesystem::remove_all("competitors/pddlTEG2pddl/tmp");
+        } else if (method == "poly") {
+            filesystem::remove_all("competitors/prologex/tmp");
         }
+    } catch (const std::exception& e) {
+        std::cerr << "Error cleaning up temporary files: " << e.what() << std::endl;
     }
 
     return 0;
