@@ -119,28 +119,21 @@ int countRealActions(const std::string &filePath) {
     }
 
     std::string line;
-    bool startProcessing = false;
-    int realActionCount = 0;
+    int realActionCount = -1;
 
     // Regex to match lines starting with "(o_"
     std::regex syncActionRegex("^\\(o_.*\\)");
+    // Regex to match lines starting with "(trans-"
+    std::regex transActionsRegex("^\\(trans-.*\\)");
 
     while (std::getline(inputFile, line)) {
-        // Skip lines until we encounter "(o_copy)"
-        if (!startProcessing) {
-            if (line.find("(o_copy)") != std::string::npos) {
-                startProcessing = true;
-            }
-            continue;
-        }
-
         // Skip empty lines
         if (line.empty()) {
             continue;
         }
 
-        // Check if the line doesn't start with "(o_" (i.e., is a real action)
-        if (!std::regex_match(line, syncActionRegex)) {
+        // Check if the line doesn't start with "(o_" or "(trans-"
+        if (!(std::regex_match(line, syncActionRegex) || std::regex_match(line, transActionsRegex))) {
             ++realActionCount;
         }
     }
