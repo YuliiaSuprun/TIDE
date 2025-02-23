@@ -42,23 +42,37 @@ void addConstantsAndModifyObjects(const std::string &domainFilePath, const std::
     std::string domainContent;
     std::string line;
     bool constantsAdded = false;
+    bool inTypesSection = false;
 
     while (std::getline(domainFile, line)) {
-        // Add constants after the closing parenthesis of the `(:types)` section
-        domainContent += line + "\n";
+        // Check if we're entering the types section.
         if (!constantsAdded && line.find("(:types") != std::string::npos) {
-            while (std::getline(domainFile, line)) {
-                domainContent += line + "\n";
-                if (line.find(')') != std::string::npos) {
-                    domainContent += "    (:constants\n"
-                                     "      b1 b2 b3 b4 b5 b6 - block\n"
-                                     "    )\n";
-                    constantsAdded = true;
-                    break;
-                }
-            }
+            inTypesSection = true;
+        }
+
+        domainContent += line + "\n";
+
+        // If we're inside the types section, check for the closing parenthesis.
+        if (inTypesSection && line.find(")") != std::string::npos) {
+            // Once the types section ends, insert the constants block.
+            domainContent += "  (:constants\n"
+                            "    b1 b2 b3 b4 b5 b6 - block\n"
+                            "  )\n";
+            // domainContent += "  (:constants\n"
+            //                 "    general - Lander\n"
+            //                 "    colour high_res low_res - Mode\n"
+            //                 "    rover0 rover1 - Rover\n"
+            //                 "    rover0store rover1store - Store\n"
+            //                 "    waypoint0 waypoint1 waypoint2 waypoint3 - Waypoint\n"
+            //                 "    camera0 camera1 camera2 - Camera\n"
+            //                 "    objective0 objective1 objective2 - Objective\n"
+            //                 "  )\n";
+                           
+            inTypesSection = false;
+            constantsAdded = true;
         }
     }
+
     domainFile.close();
 
     if (!constantsAdded) {
@@ -85,7 +99,7 @@ void addConstantsAndModifyObjects(const std::string &domainFilePath, const std::
     while (std::getline(problemFile, line)) {
         if (line.find("(:objects") != std::string::npos && !objectsReplaced) {
             // Replace the objects line with "(:objects noobjects)"
-            problemContent += "    (:objects noobjects)\n";
+            problemContent += "  (:objects noobjects)\n";
             objectsReplaced = true;
             // // Skip the subsequent lines for the objects section
             // while (std::getline(problemFile, line) && line.find(')') == std::string::npos) {
@@ -488,7 +502,7 @@ int main(int argc, char** argv) {
             cerr << "ERROR: Unknown method: " << method << endl;
             exit(EXIT_FAILURE);
         }
-        cout << "translateCmd: " << translateCmd << endl;
+        // cout << "translateCmd: " << translateCmd << endl;
 
         // Get the base path from the environment variable, or use the default local path (modify it)
         const char* basePath = std::getenv("FAST_DOWNWARD_BASE_PATH");
@@ -500,7 +514,7 @@ int main(int argc, char** argv) {
         if (timeout != 0) {
             fastDownwardCmd = "timeout " + to_string(timeout) + " " + fastDownwardCmd;
         }
-        cout << "fastDownwardCmd: " << fastDownwardCmd << endl;
+        // cout << "fastDownwardCmd: " << fastDownwardCmd << endl;
 
         for (int run = 0; run < numRuns; ++run) {
             cout << "Run #" << run + 1 << " for " << problemFilePath << endl;
@@ -529,6 +543,7 @@ int main(int argc, char** argv) {
                 ifstream sasPlanFile(plan_file_name);
                 if (!sasPlanFile.is_open()) {
                     cerr << "Failed to generate a plan for run #" << run + 1 << endl;
+                    break;
                 } else {
                     // Open the destination file for the plan
                     ofstream outFile(planFilePath);
@@ -583,7 +598,7 @@ int main(int argc, char** argv) {
                 }
             } else {
                 // Use A* planner otherwise.
-                cout << "Initializing A* planner for problem: " << problemFilePath << endl;
+                // cout << "Initializing A* planner for problem: " << problemFilePath << endl;
                 // Use A* planner otherwise.
                 // 1. Create and parse the PDDL problem
                 try {
@@ -591,18 +606,18 @@ int main(int argc, char** argv) {
                     removeQuotes(outputDomainPath);
                     removeQuotes(outputProblemPath);
                     addRequirementsLine(outputDomainPath);
-                    // addConstantsAndModifyObjects(outputDomainPath, outputProblemPath);
+                    addConstantsAndModifyObjects(outputDomainPath, outputProblemPath);
                 } catch (const std::exception &e) {
                     std::cerr << "Error: " << e.what() << std::endl;
                 }
                 // Parse the domain file into a pddlboat::DomainPtr
                 auto domainPtr = PDDLDomain::parseDomain(outputDomainPath);
 
-                cout << "Domain parsed" << endl;
+                // cout << "Domain parsed" << endl;
 
                 // Parse the problem file into a pddlboat::ProblemPtr using the domain
                 auto problemPtr = PDDLProblem::parseProblem(outputProblemPath, domainPtr);
-                cout << "Problem parsed" << endl;
+                // cout << "Problem parsed" << endl;
 
 
                 // 2. Initialize the A* planner
@@ -610,17 +625,17 @@ int main(int argc, char** argv) {
                 /// 3. Create a plan object
                 auto plan = std::make_shared<pddlboat::Plan>(problemPtr);
 
-                cout << "About to solve" << endl;
+                // cout << "About to solve" << endl;
                 auto astar_start = chrono::high_resolution_clock::now();
                 // 4. Solve the problem
                 if (!task_planner->solve(*plan, timeout))
                 {
                     cerr << "ERROR: No solution was found." << endl;
-                    continue;
+                    break;
                 }
                 auto astar_end = chrono::high_resolution_clock::now();
                 search_elapsed = astar_end - astar_start;
-                cout << "Solved!" << endl;
+                // cout << "Solved!" << endl;
                 // 5. Retrieve the plan steps
                 auto plan_steps = plan->getSteps();
                 if (plan_steps.empty()) {
@@ -634,7 +649,7 @@ int main(int argc, char** argv) {
                     cerr << "Failed to open output plan file: " << planFilePath << endl;
                     exit(EXIT_FAILURE);
                 } 
-                cout << "Writing the plan to: " << planFilePath << endl;
+                // cout << "Writing the plan to: " << planFilePath << endl;
                 planFile << "Plan for problem: " << problemFilePath << "\n\n";
                 for (const auto& step : plan_steps) {
                     step.toString(planFile) << endl; // Write each step 
