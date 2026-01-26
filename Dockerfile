@@ -1,7 +1,7 @@
 # Use the official Ubuntu 22.04 base image
 FROM ubuntu:22.04
 
-# Set environment variables to avoid interaction during package installation
+# Avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
@@ -26,42 +26,55 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda (lightweight Anaconda version)
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda && \
-    rm Miniconda3-latest-Linux-x86_64.sh
+# Install Miniconda (architecture-aware)
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        MINICONDA=Miniconda3-latest-Linux-x86_64.sh; \
+    else \
+        MINICONDA=Miniconda3-latest-Linux-aarch64.sh; \
+    fi && \
+    wget https://repo.anaconda.com/miniconda/$MINICONDA && \
+    bash $MINICONDA -b -p /opt/miniconda && \
+    rm $MINICONDA
 
-# Set LD_LIBRARY_PATH for runtime
-ENV LD_LIBRARY_PATH=/app/lib:/app/pddlboat/build/release:/opt/miniconda/envs/spotenv/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+# Configure Conda and accept ToS
+RUN /opt/miniconda/bin/conda config --system --set always_yes true && \
+    /opt/miniconda/bin/conda config --system --set changeps1 false && \
+    /opt/miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    /opt/miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 
-# Set environment variable for Fast Downward path
+# Environment variables
+ENV LD_LIBRARY_PATH=/app/lib:/app/pddlboat/build/release:/usr/local/lib:/usr/lib:/opt/miniconda/envs/spotenv/lib:${LD_LIBRARY_PATH:-}
 ENV FAST_DOWNWARD_BASE_PATH=/app/pddlboat/submodules/downward
+ENV PATH="/opt/miniconda/bin:/opt/miniconda/envs/spotenv/bin:/app/pddlboat/submodules/downward:$PATH"
 
-# Create a new Conda environment and install Spot
-RUN /opt/miniconda/bin/conda create --name spotenv python=3.8 -y && \
-    /opt/miniconda/bin/conda run -n spotenv conda install -c conda-forge spot -y
+# Create Conda environment and install Spot
+RUN /opt/miniconda/bin/conda create --name spotenv python=3.8 && \
+    /opt/miniconda/bin/conda run -n spotenv conda install -c conda-forge spot && \
+    /opt/miniconda/bin/conda clean -afy
 
-# Install Plan4Past from PyPI
+# Install Plan4Past
 RUN pip3 install plan4past
 
-# Download and install Boost 1.82.0 from source
+# Build Boost 1.82 library
 WORKDIR /tmp
 RUN wget https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.gz && \
     tar -xvzf boost_1_82_0.tar.gz && \
     cd boost_1_82_0 && \
     ./bootstrap.sh && \
-    ./b2 install --prefix=/usr/local && \
+    ./b2 install --prefix=/usr/local cxxstd=17 cxxflags="-std=c++17" && \
     rm -rf /tmp/boost_1_82_0 /tmp/boost_1_82_0.tar.gz
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy the entire project into the container
+# Copy project
 COPY . /app
 
-# Build Fast Downward planner
+# Build Fast Downward
 WORKDIR /app/pddlboat/submodules/downward
-RUN apt-get update && apt-get install -y cmake g++ make python3 && apt-get clean && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get install -y cmake g++ make python3 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
     python3 build.py && \
     ./fast-downward.py --help
 
@@ -69,19 +82,15 @@ RUN apt-get update && apt-get install -y cmake g++ make python3 && apt-get clean
 WORKDIR /app/pddlboat
 RUN mkdir -p build/release && cd build/release && cmake ../.. && make
 
-# Add Miniconda and FastDownward to PATH
-ENV PATH="/opt/miniconda/bin:/opt/miniconda/envs/spotenv/bin:/app/pddlboat/submodules/downward:$PATH"
-
-WORKDIR /app
-
 # Install FOND4LTLf and dependencies
-RUN /opt/miniconda/bin/conda run -n spotenv conda install pip -y && \
+WORKDIR /app
+RUN /opt/miniconda/bin/conda run -n spotenv conda install pip && \
     /opt/miniconda/bin/conda run -n spotenv pip install --upgrade pip setuptools wheel && \
     /opt/miniconda/bin/conda run -n spotenv pip install ltlf2dfa click ply && \
     cd /app/competitors/FOND4LTLf && \
     /opt/miniconda/bin/conda run -n spotenv pip install .
 
-# Build the project using the Makefile
+# Build project using Makefile
 RUN /opt/miniconda/bin/conda run -n spotenv make
 
-# No default command; specify executable and arguments at runtime
+# No default CMD
