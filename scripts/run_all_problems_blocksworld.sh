@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the base directory path for your problems and domain file
-BASE_DIR="/app/data/deterministic/LTLf/S24/blocksworld"
+BASE_DIR="/app/benchmarking/data/deterministic/LTLf/S24/blocksworld"
 DOMAIN_FILE="$BASE_DIR/domain.pddl"
 
 # Iterate from p10 to p30

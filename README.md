@@ -58,15 +58,15 @@ To start a container from the image:
 To run TIDE on a specific PDDL problem:
 
 ```bash
-scripts/run_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
-                      data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
+scripts/run_single.sh benchmarking/data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
+                      benchmarking/data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
                       3 -f -h -c --planner fd --search lama-first
 ```
 
 #### **Explanation of Arguments:**
 - **Domain and Problem Files:**
-  - `data/deterministic/LTLf/TB15/blocksworld/domain.pddl`: Path to the domain file.
-  - `data/deterministic/LTLf/TB15/blocksworld/a03.pddl`: Path to the problem file.
+  - `benchmarking/data/deterministic/LTLf/TB15/blocksworld/domain.pddl`: Path to the domain file.
+  - `benchmarking/data/deterministic/LTLf/TB15/blocksworld/a03.pddl`: Path to the problem file.
 - **Number of Runs:**
   - `3`: Specifies the number of runs for TIDE.
 - **Options:**
@@ -115,12 +115,12 @@ or (if a caching option `-c` was provided)
 To run TIDE on all PDDL problems in a directory:
 
 ```bash
-scripts/run_all_in_dir.sh data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --planner astar
+scripts/run_all_in_dir.sh benchmarking/data/deterministic/LTLf/TB15/blocksworld 3 -f -h -c --planner astar
 ```
 
 #### **Explanation of Arguments:**
 - **Directory Path:**
-  - `data/deterministic/LTLf/TB15/blocksworld`: Path to the directory containing `domain.pddl` and problem files.
+  - `benchmarking/data/deterministic/LTLf/TB15/blocksworld`: Path to the directory containing `domain.pddl` and problem files.
 - **Other Arguments:**
   - These are the same as described for running TIDE on a single problem.
 
@@ -149,38 +149,38 @@ These methods use **two classical off-the-shelf planners**:
 
 #### **Exp Method:**
 ```bash
-scripts/run_others_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
-                            data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
+scripts/run_others_single.sh benchmarking/data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
+                            benchmarking/data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
                             3 --method exp --search lama-first
 ```
 
 #### **Poly Method:**
 ```bash
-scripts/run_others_single.sh data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
+scripts/run_others_single.sh benchmarking/data/deterministic/LTLf/TB15/blocksworld/domain.pddl \
                             data/deterministic/LTLf/TB15/blocksworld/a03.pddl \
                             3 --method poly --search lama-first
 ```
 
 #### **Plan4Past Method:**
 ```bash
-scripts/run_others_single.sh data/deterministic/PPLTL/TB15/blocksworld/domain.pddl \
-                            data/deterministic/PPLTL/TB15/blocksworld/a03.pddl \
+scripts/run_others_single.sh benchmarking/data/deterministic/PPLTL/TB15/blocksworld/domain.pddl \
+                            benchmarking/data/deterministic/PPLTL/TB15/blocksworld/a03.pddl \
                             3 --method plan4past --search lama-first \
-                            --goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
+                            --goal benchmarking/data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
 ```
 
 #### **FOND4LTLf Method:**
 ```bash
-scripts/run_others_single.sh data/deterministic/FOND4LTLf/TB15/blocksworld/domain.pddl \
-                            data/deterministic/FOND4LTLf/TB15/blocksworld/a03.pddl \
+scripts/run_others_single.sh benchmarking/data/deterministic/FOND4LTLf/TB15/blocksworld/domain.pddl \
+                            benchmarking/data/deterministic/FOND4LTLf/TB15/blocksworld/a03.pddl \
                             3 --method fond4ltlf --search lama-first \
-                            --goal data/deterministic/FOND4LTLf/TB15/blocksworld/blocksworld_teg.json
+                            --goal benchmarking/data/deterministic/FOND4LTLf/TB15/blocksworld/blocksworld_teg.json
 ```
 
 #### **Explanation of Arguments:**
 - **Domain and Problem Files:**
-  - `data/deterministic/PPLTL/TB15/blocksworld/domain.pddl`: Path to the domain file.
-  - `data/deterministic/PPLTL/TB15/blocksworld/a03.pddl`: Path to the problem file.
+  - `benchmarking/data/deterministic/PPLTL/TB15/blocksworld/domain.pddl`: Path to the domain file.
+  - `benchmarking/data/deterministic/PPLTL/TB15/blocksworld/a03.pddl`: Path to the problem file.
 - **Number of Runs:**
   - `3`: Specifies the number of runs.
 - **Method Selection:**
@@ -188,7 +188,7 @@ scripts/run_others_single.sh data/deterministic/FOND4LTLf/TB15/blocksworld/domai
 - **Search Strategy:**
   - `--search lama-first`: Specifies the search strategy (`lama-full`, `lama-first`).
 - **Temporal Goal File:**
-  - `--goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json`: Path to the goal specification JSON file. This argument is required only for `plan4past` and `fond4ltlf`.
+  - `--goal benchmarking/data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json`: Path to the goal specification JSON file. This argument is required only for `plan4past` and `fond4ltlf`.
 ---
 
 ### **Running a Competitor Method on All Problems in a Directory**
@@ -196,13 +196,13 @@ scripts/run_others_single.sh data/deterministic/FOND4LTLf/TB15/blocksworld/domai
 The scripts for running competitor methods on all problems in a directory use the same arguments as the scripts that solve a single problem. For example, to run plan4past on all problems in a directory:
 
 ```bash
-scripts/run_others_all_in_dir.sh data/deterministic/PPLTL/TB15/blocksworld 3 --method plan4past \
-                                --search lama-first --goal data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
+scripts/run_others_all_in_dir.sh benchmarking/data/deterministic/PPLTL/TB15/blocksworld 3 --method plan4past \
+                                --search lama-first --goal benchmarking/data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json
 ```
 
 #### **Explanation of Arguments:**
 - **Directory Path:**
-  - `data/deterministic/PPLTL/TB15/blocksworld`: Directory containing `domain.pddl` and problem files.
+  - `benchmarking/data/deterministic/PPLTL/TB15/blocksworld`: Directory containing `domain.pddl` and problem files.
 - **Other Arguments:**
   - These are the same as described for running a single problem.
 

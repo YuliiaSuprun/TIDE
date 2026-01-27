@@ -29,7 +29,7 @@ using namespace std;
 
 
 // Example of the command
-// ./run.sh /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/PPLTL/TB15/blocksworld /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json 1 --planner fd --search lama
+// ./run.sh benchmarking/data/deterministic/PPLTL/TB15/blocksworld benchmarking/data/deterministic/PPLTL/TB15/blocksworld/blocksworld_teg.json 1 --planner fd --search lama
 
 // Function to add constants to the domain file and modify the problem file
 void addConstantsAndModifyObjects(const std::string &domainFilePath, const std::string &problemFilePath) {
@@ -493,18 +493,21 @@ int main(int argc, char** argv) {
             translateCmd = "plan4past -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\"" + mapFileArgString + " -od " + outputDomainPath + " -op " + outputProblemPath + " > /dev/null 2>&1";
         } else if (method == "exp") {
             // Run a script from ltl_compilations/pddlTEG2pddl directory
-            translateCmd = "cd competitors/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
+            translateCmd = "cd benchmarking/baselines/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
         } else if (method == "poly") {
             // Run a script from ltl_compilations/pddlTEG2pddl directory
-            translateCmd = "cd competitors/prologex; ./launch_compilation.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " 2 > /dev/null 2>&1";
+            translateCmd = "cd benchmarking/baselines/prologex; ./launch_compilation.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " 2 > /dev/null 2>&1";
         } else {
             cerr << "ERROR: Unknown method: " << method << endl;
             exit(EXIT_FAILURE);
         }
         // cout << "translateCmd: " << translateCmd << endl;
+        // Get the base path from the environment variable, or use the default local path (modify it)
+        const char* basePath = std::getenv("FAST_DOWNWARD_BASE_PATH");
+        std::string basePathStr = basePath ? basePath : "pddlboat/submodules/downward"; 
 
         // Construct the Fast Downward command
-        string fastDownwardCmd = "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
+        string fastDownwardCmd = basePathStr + "/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
 
         if (timeout != 0) {
             fastDownwardCmd = "timeout " + to_string(timeout) + " " + fastDownwardCmd;
@@ -690,8 +693,8 @@ int main(int argc, char** argv) {
 
     // After running experiments, clean up all temporary files
     if (method == "poly" || method == "exp") {
-        std::string tempDirPoly = "competitors/pddlTEG2pddl/tmp";
-        std::string tempDirExp = "competitors/prologex/tmp";
+        std::string tempDirPoly = "benchmarking/baselines/pddlTEG2pddl/tmp";
+        std::string tempDirExp = "benchmarking/baselines/prologex/tmp";
 
         try {
             cleanUpTempFiles(tempDirPoly);

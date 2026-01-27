@@ -87,7 +87,7 @@ WORKDIR /app
 RUN /opt/miniconda/bin/conda run -n spotenv conda install pip && \
     /opt/miniconda/bin/conda run -n spotenv pip install --upgrade pip setuptools wheel && \
     /opt/miniconda/bin/conda run -n spotenv pip install ltlf2dfa click ply && \
-    cd /app/competitors/FOND4LTLf && \
+    cd /app/benchmarking/baselines/FOND4LTLf && \
     /opt/miniconda/bin/conda run -n spotenv pip install .
 
 # Build project using Makefile

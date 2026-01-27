@@ -215,10 +215,10 @@ int main(int argc, char** argv) {
         translateCmd = "fond4ltlf -d " + domainFilePath + " -p " + problemFilePath + " -g \"" + goal_expression + "\" -outd " + outputDomainPath + " -outp " + outputProblemPath + " > /dev/null 2>&1";
     } else if (method == "exp") {
         // Run a script from ltl_compilations/pddlTEG2pddl directory
-        translateCmd = "cd competitors/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
+        translateCmd = "cd benchmarking/baselines/pddlTEG2pddl; ./convert.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " dp > /dev/null 2>&1";
     } else if (method == "poly") {
         // Run a script from ltl_compilations/pddlTEG2pddl directory
-        translateCmd = "cd competitors/prologex; ./launch_compilation.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " 2 > /dev/null 2>&1";
+        translateCmd = "cd benchmarking/baselines/prologex; ./launch_compilation.sh " + domainFilePath + " " + problemFilePath + " " + outputDomainPath + " " + outputProblemPath + " 2 > /dev/null 2>&1";
     } else {
         cerr << "ERROR: Unknown method: " << method << endl;
         exit(EXIT_FAILURE);
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
     // Get the base path from the environment variable, or use the default local path (modify it)
     const char* basePath = std::getenv("FAST_DOWNWARD_BASE_PATH");
-    std::string basePathStr = basePath ? basePath : "/home/pack-a-punch/Documents/Programming/yuliia/ResearchCode/Task-Planning-with-TEGs/docker_dir/pddlboat/submodules/downward";
+    std::string basePathStr = basePath ? basePath : "pddlboat/submodules/downward";
 
     // Construct the Fast Downward command
     std::string fastDownwardCmd = basePathStr + "/fast-downward.py --alias " + alias_name + " " + outputDomainPath + " " + outputProblemPath + " > /dev/null 2>&1";
@@ -360,9 +360,9 @@ int main(int argc, char** argv) {
     // After running experiments, clean up all temporary files
     try {
         if (method == "exp") {
-            filesystem::remove_all("competitors/pddlTEG2pddl/tmp");
+            filesystem::remove_all("benchmarking/baselines/pddlTEG2pddl/tmp");
         } else if (method == "poly") {
-            filesystem::remove_all("competitors/prologex/tmp");
+            filesystem::remove_all("benchmarking/baselines/prologex/tmp");
         }
     } catch (const std::exception& e) {
         std::cerr << "Error cleaning up temporary files: " << e.what() << std::endl;

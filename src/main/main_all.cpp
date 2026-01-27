@@ -28,7 +28,7 @@
 using namespace std;
 
 // Example of the command
-// ./run.sh /Users/yuliiasuprun/Desktop/Classes/AlgoRobotics/Research/Code/Plan4Past-data/deterministic/LTLf/TB15/blocksworld 1 -f -h --save_dfa --planner fd --search lama
+// ./run.sh benchmarking/data/deterministic/LTLf/TB15/blocksworld 1 -f -h --save_dfa --planner fd --search lama
 
 // Function to print stats to any output stream (either console or file)
 void printStats(std::ostream& os, int numRuns, double averageDFATime, double firstRunDFATime, double averageDFATimeNoFirst, double averageSearchTime, double averageTotalTime, double averageExpandedNodes, double averagePlanLength, double averageNumOfBacktracks) {

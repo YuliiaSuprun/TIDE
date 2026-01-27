@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the base directory path for your problems and domain files
-BASE_DIR="/app/data/deterministic/LTLf/BF23/openstacks"
+BASE_DIR="/app/benchmarking/data/deterministic/LTLf/BF23/openstacks"
 
 # Iterate from p01 to p30
 for i in $(seq -f "%02g" 1 5); do  # '-f' ensures two-digit padding
